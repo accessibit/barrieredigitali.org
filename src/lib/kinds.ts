@@ -13,7 +13,7 @@ export const KIND_OPTIONS = [
   {
     value: "WEBSITE",
     label: "Sito web",
-    hint: "Ad esempio negozio.example o l’indirizzo della pagina.",
+    hint: "Ad esempio comune.milano.it o l’indirizzo della pagina.",
   },
   {
     value: "APP",

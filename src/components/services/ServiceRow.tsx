@@ -1,18 +1,16 @@
 import Link from "next/link";
 
 import { Favicon } from "@/components/services/Favicon";
-import { formatDate, toIsoDate } from "@/lib/format";
+import { formatDate, receivedLabel, toIsoDate } from "@/lib/format";
 import { KIND_LABEL } from "@/lib/kinds";
 import type { ServiceSummary } from "@/lib/services";
 
 export function ServiceRow({
   service,
   rank,
-  focusOnArrival = false,
 }: {
   service: ServiceSummary;
   rank?: number;
-  focusOnArrival?: boolean;
 }) {
   return (
     <li className="border-b border-line">
@@ -27,7 +25,6 @@ export function ServiceRow({
               id={`link-${service.slug}`}
               href={`/segnalazioni/${service.slug}`}
               className="rowlink"
-              data-route-focus={focusOnArrival ? "" : undefined}
             >
               {service.name}
             </Link>{" "}
@@ -47,7 +44,7 @@ export function ServiceRow({
             {service.count}
           </b>
           <span className="mt-0.5 text-[0.8125rem]/tight font-medium whitespace-nowrap text-count-label narrow:text-xs narrow:whitespace-normal">
-            segnalazioni ricevute
+            {receivedLabel(service.count)}
           </span>
         </p>
         <svg

@@ -32,7 +32,8 @@ export function SearchTools({
   const [syncedQuery, setSyncedQuery] = useState(query);
   if (query !== syncedQuery) {
     setSyncedQuery(query);
-    setValue(query);
+    // Non sovrascrivere ciò che si sta scrivendo (es. lo spazio finale non va nell'URL).
+    if (query !== value.trim()) setValue(query);
   }
 
   useEffect(() => () => window.clearTimeout(timer.current), []);

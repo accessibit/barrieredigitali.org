@@ -1,60 +1,70 @@
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
+import { BackToList } from "@/components/services/BackToList";
 import { Favicon } from "@/components/services/Favicon";
-import { formatDate, plural, toIsoDate } from "@/lib/format";
+import { FocusOnChange } from "@/components/services/FocusOnChange";
+import { Pager } from "@/components/services/Pager";
+import { formatDate, plural, receivedLabel, toIsoDate } from "@/lib/format";
 import { KIND_LABEL } from "@/lib/kinds";
-import { getService } from "@/lib/services";
+import { last } from "@/lib/search-params";
+import { getService, getServiceReports } from "@/lib/services";
+import { REPORTS_PER_PAGE } from "@/lib/site";
 
-export async function generateMetadata({
-  params,
-}: PageProps<"/segnalazioni/[slug]">): Promise<Metadata> {
+type Props = PageProps<"/segnalazioni/[slug]">;
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const service = await getService(slug);
   if (!service) return { title: "Pagina non trovata" };
   return {
     title: `${service.name} — segnalazioni`,
-    description: `${plural(service.count, "segnalazione pubblicata", "segnalazioni pubblicate")} su ${service.name}.`,
+    description: `${plural(service.count, "segnalazione pubblicata", "segnalazioni pubblicate")} su ${service.name}, verificate dalla redazione di Barriere Digitali.`,
+    alternates: { canonical: `/segnalazioni/${service.slug}` },
   };
 }
 
-export default function ServicePage({
-  params,
-}: PageProps<"/segnalazioni/[slug]">) {
+/**
+ * Pagina "bloccante": il server invia l'HTML completo, senza contenuti in
+ * streaming. Così elenco, ricerca e modulo funzionano anche senza JavaScript
+ * e non c'è salto di layout durante il caricamento.
+ */
+export const instant = false;
+
+export default function ServicePage({ params, searchParams }: Props) {
   return (
     <div className="wrap">
-      <Suspense
-        fallback={
-          <p role="status" className="mt-6 text-muted">
-            Caricamento delle segnalazioni…
-          </p>
-        }
-      >
-        <ServiceDetail params={params} />
-      </Suspense>
+      <ServiceDetail params={params} searchParams={searchParams} />
     </div>
   );
 }
 
 async function ServiceDetail({
   params,
-}: {
-  params: PageProps<"/segnalazioni/[slug]">["params"];
-}) {
+  searchParams,
+}: Pick<Props, "params" | "searchParams">) {
   const { slug } = await params;
   const service = await getService(slug);
   if (!service) notFound();
 
+  const requested = Math.max(
+    1,
+    Number.parseInt(last((await searchParams).pagina), 10) || 1,
+  );
+  const { reports, page, pages, start } = await getServiceReports(
+    service.id,
+    requested,
+    service.count,
+  );
+  const pageHref = (p: number) =>
+    p > 1
+      ? `/segnalazioni/${service.slug}?pagina=${p}`
+      : `/segnalazioni/${service.slug}`;
+
   return (
     <article className="page max-w-none">
-      <Link
-        href={`/?da=${encodeURIComponent(service.slug)}` as Route}
-        className="back"
-      >
-        ← Tutte le segnalazioni
-      </Link>
+      <BackToList slug={service.slug} />
       <div className="mt-3 flex items-center gap-4 narrow:flex-wrap">
         <Favicon name={service.name} slug={service.slug} size="lg" />
         <div className="min-w-0 flex-auto narrow:basis-40">
@@ -73,7 +83,7 @@ async function ServiceDetail({
             {service.count}
           </b>
           <span className="mt-0.5 text-[0.8125rem]/tight font-medium text-muted narrow:text-[0.9375rem]">
-            segnalazioni ricevute
+            {receivedLabel(service.count)}
           </span>
         </p>
       </div>
@@ -87,11 +97,23 @@ async function ServiceDetail({
           Segnala un problema su {service.name}
         </Link>
       </div>
-      <h2 className="mt-9 border-b border-ink pb-2 text-base font-semibold">
+      <h2
+        id="elenco-segnalazioni"
+        tabIndex={-1}
+        className="mt-9 border-b border-ink pb-2 text-base font-semibold"
+      >
         Segnalazioni, dalla più recente
+        {pages > 1 && (
+          <span className="font-normal text-muted">
+            {" "}
+            · {start + 1}–{Math.min(start + REPORTS_PER_PAGE, service.count)} di{" "}
+            {service.count}
+          </span>
+        )}
       </h2>
+      <FocusOnChange value={String(page)} targetId="elenco-segnalazioni" />
       <ol className="m-0 list-none p-0">
-        {service.reports.map((report) => (
+        {reports.map((report) => (
           <li
             key={report.id}
             className="grid grid-cols-[8rem_minmax(0,1fr)] gap-x-6 gap-y-0.5 border-b border-line py-3.5 narrow:grid-cols-1"
@@ -108,6 +130,15 @@ async function ServiceDetail({
           </li>
         ))}
       </ol>
+      {pages > 1 && (
+        <Pager
+          label="Pagine delle segnalazioni"
+          summary={`Pagina ${page} di ${pages}`}
+          page={page}
+          pages={pages}
+          href={pageHref}
+        />
+      )}
     </article>
   );
 }

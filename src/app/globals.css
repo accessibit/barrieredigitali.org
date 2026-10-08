@@ -55,8 +55,10 @@
     margin: 0;
   }
 
+  /* Il preflight di Tailwind toglie la sottolineatura: i link nel testo devono averla. */
   a {
     color: var(--color-accent);
+    text-decoration-line: underline;
     text-underline-offset: 0.2em;
   }
 
@@ -105,6 +107,9 @@
   }
   .btn:hover {
     @apply border-accent-dark bg-accent-dark;
+  }
+  .btn[aria-disabled="true"] {
+    @apply cursor-progress opacity-75;
   }
   a.btn,
   a.btn:visited,

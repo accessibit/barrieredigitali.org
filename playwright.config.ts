@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = Number(process.env.E2E_PORT ?? 3210);
@@ -9,6 +11,8 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`;
  */
 export default defineConfig({
   testDir: "./e2e",
+  // Cancella le segnalazioni create dai test, una volta sola alla fine.
+  globalTeardown: "./e2e/teardown.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

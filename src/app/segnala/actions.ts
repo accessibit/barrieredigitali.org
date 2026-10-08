@@ -1,7 +1,11 @@
 "use server";
 
+import { headers } from "next/headers";
+import { redirect, RedirectType } from "next/navigation";
+
 import { db } from "@/lib/db";
 import { kindOptionLabel } from "@/lib/kinds";
+import { rememberErrors, rememberSent } from "@/lib/report-postback";
 import { type ReportField, validateReport } from "@/lib/validation";
 
 export type ReportFormValues = {
@@ -41,8 +45,16 @@ export async function submitReport(
     email: read(formData, "email"),
   };
 
+  // Le chiamate dal browser con JavaScript portano l'intestazione Next-Action;
+  // un normale invio del modulo (JavaScript disattivato) no.
+  const withoutJs = !(await headers()).has("next-action");
+
   const { data, errors } = validateReport(values);
   if (!data) {
+    if (withoutJs) {
+      await rememberErrors(values, errors);
+      redirect("/segnala", RedirectType.replace);
+    }
     const submission =
       previous.status === "error" ? previous.submission + 1 : 1;
     return { status: "error", values, errors, submission };
@@ -57,17 +69,23 @@ export async function submitReport(
 
   // Campo trappola per i bot: se compilato, fingiamo il successo senza salvare.
   if (read(formData, "website_url") !== "") {
+    if (withoutJs) redirect("/segnala", RedirectType.replace);
     return { status: "sent", values, recap };
   }
 
-  await db.report.create({
+  const report = await db.report.create({
     data: {
       submittedKind: data.kind,
       submittedName: data.site,
       description: data.desc,
       email: data.email || null,
     },
+    select: { id: true },
   });
 
+  if (withoutJs) {
+    await rememberSent(report.id);
+    redirect("/segnala", RedirectType.replace);
+  }
   return { status: "sent", values, recap };
 }

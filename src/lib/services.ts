@@ -1,12 +1,12 @@
 import "server-only";
 
-import { cache } from "react";
+import { cacheLife, cacheTag } from "next/cache";
 
 import { Prisma } from "@/generated/prisma/client";
 import type { ServiceKind } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { normalizeName } from "@/lib/normalize";
-import { PER_PAGE } from "@/lib/site";
+import { PER_PAGE, REPORTS_PER_PAGE } from "@/lib/site";
 
 export type SortOrder = "count" | "recent";
 
@@ -44,10 +44,19 @@ export async function listServices({
   sort: SortOrder;
   page: number;
 }): Promise<ServicePage> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("reports");
+
   const q = normalizeName(query);
-  const filter = q
-    ? Prisma.sql`AND s.name_normalized LIKE ${"%" + escapeLike(q) + "%"}`
-    : Prisma.empty;
+  // Ricerca indifferente a spazi, trattini e punti: "comune milano" trova "comune-milano.example".
+  const compact = q.replace(/[^\p{L}\p{N}]+/gu, "");
+  const filter = !q
+    ? Prisma.empty
+    : compact
+      ? Prisma.sql`AND (s.name_normalized LIKE ${"%" + escapeLike(q) + "%"}
+          OR regexp_replace(s.name_normalized, '[^[:alnum:]]+', '', 'g') LIKE ${"%" + escapeLike(compact) + "%"})`
+      : Prisma.sql`AND s.name_normalized LIKE ${"%" + escapeLike(q) + "%"}`;
 
   const [{ total }] = await db.$queryRaw<[{ total: number }]>`
     SELECT COUNT(DISTINCT s.id)::int AS total
@@ -83,32 +92,59 @@ export async function listServices({
   return { items, total, page: current, pages, start };
 }
 
-/** Dettaglio di un servizio con le sue segnalazioni pubblicate, dalla più recente. */
-export const getService = cache(async function getService(slug: string) {
+/** Testata del dettaglio: servizio, numero di segnalazioni pubblicate e data dell'ultima. */
+export async function getService(slug: string) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("reports");
+
   const service = await db.service.findUnique({
     where: { slug },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      kind: true,
-      reports: {
-        where: { status: "PUBLISHED", publishedAt: { not: null } },
-        orderBy: { publishedAt: "desc" },
-        select: { id: true, description: true, publishedAt: true },
-      },
-    },
+    select: { id: true, slug: true, name: true, kind: true },
   });
-  if (!service || service.reports.length === 0) return null;
-  const reports = service.reports.map((r) => ({
+  if (!service) return null;
+
+  const published = {
+    serviceId: service.id,
+    status: "PUBLISHED",
+    publishedAt: { not: null },
+  } as const;
+  const [count, latest] = await Promise.all([
+    db.report.count({ where: published }),
+    db.report.findFirst({
+      where: published,
+      orderBy: { publishedAt: "desc" },
+      select: { publishedAt: true },
+    }),
+  ]);
+  if (count === 0 || !latest?.publishedAt) return null;
+  return { ...service, count, lastReportAt: latest.publishedAt };
+}
+
+/** Una pagina delle segnalazioni pubblicate di un servizio, dalla più recente. */
+export async function getServiceReports(
+  serviceId: string,
+  page: number,
+  count: number,
+) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("reports");
+
+  const pages = Math.max(1, Math.ceil(count / REPORTS_PER_PAGE));
+  const current = Math.min(Math.max(1, page), pages);
+  const start = (current - 1) * REPORTS_PER_PAGE;
+  const rows = await db.report.findMany({
+    where: { serviceId, status: "PUBLISHED", publishedAt: { not: null } },
+    orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
+    skip: start,
+    take: REPORTS_PER_PAGE,
+    select: { id: true, description: true, publishedAt: true },
+  });
+  const reports = rows.map((r) => ({
     id: r.id,
     description: r.description,
     publishedAt: r.publishedAt!,
   }));
-  return {
-    ...service,
-    reports,
-    count: reports.length,
-    lastReportAt: reports[0]!.publishedAt,
-  };
-});
+  return { reports, page: current, pages, start };
+}

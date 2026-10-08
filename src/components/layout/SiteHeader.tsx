@@ -12,7 +12,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-header flex-wrap items-center gap-x-8 gap-y-2 px-10 py-3 narrow:justify-between narrow:gap-x-4 narrow:gap-y-1 narrow:px-4 narrow:pt-2.5 narrow:pb-0">
         <Link
           href="/"
-          className="flex-none text-lg/[1.3] font-bold tracking-[-0.02em] whitespace-nowrap text-ink no-underline hover:text-ink hover:underline"
+          className="inline-flex min-h-11 flex-none items-center text-lg/[1.3] font-bold tracking-[-0.02em] whitespace-nowrap text-ink no-underline hover:text-ink hover:underline"
         >
           {SITE.name}
         </Link>

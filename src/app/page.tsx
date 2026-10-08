@@ -1,19 +1,26 @@
 import type { Metadata, Route } from "next";
 import Link from "next/link";
-import { Suspense } from "react";
 
 import { FocusOnChange } from "@/components/services/FocusOnChange";
 import { Pager } from "@/components/services/Pager";
+import { RememberList } from "@/components/services/RememberList";
 import { SearchTools } from "@/components/services/SearchTools";
 import { ServiceRow } from "@/components/services/ServiceRow";
-import { plural } from "@/lib/format";
 import { listHref, parseListParams } from "@/lib/search-params";
 import { listServices } from "@/lib/services";
 import { PER_PAGE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: { absolute: "Segnalazioni — Barriere Digitali" },
+  alternates: { canonical: "/" },
 };
+
+/**
+ * Pagina "bloccante": il server invia l'HTML completo, senza contenuti in
+ * streaming. Così elenco, ricerca e modulo funzionano anche senza JavaScript
+ * e non c'è salto di layout durante il caricamento.
+ */
+export const instant = false;
 
 export default function HomePage({ searchParams }: PageProps<"/">) {
   return (
@@ -25,18 +32,13 @@ export default function HomePage({ searchParams }: PageProps<"/">) {
       >
         Le barriere del web, segnalate da chi le incontra.
       </h1>
-      <Suspense fallback={<ListFallback />}>
-        <ServiceListing searchParams={searchParams} />
-      </Suspense>
+      <p className="mt-2 max-w-[60ch] text-muted">
+        Siti, app e documenti digitali che le persone non sono riuscite a usare.
+        Ogni segnalazione è letta dalla redazione prima di essere pubblicata.{" "}
+        <Link href="/come-funziona">Come funziona</Link>
+      </p>
+      <ServiceListing searchParams={searchParams} />
     </div>
-  );
-}
-
-function ListFallback() {
-  return (
-    <p role="status" className="mt-6 text-muted">
-      Caricamento delle segnalazioni…
-    </p>
   );
 }
 
@@ -45,12 +47,7 @@ async function ServiceListing({
 }: {
   searchParams: PageProps<"/">["searchParams"];
 }) {
-  const {
-    query,
-    sort,
-    page: requested,
-    from,
-  } = parseListParams(await searchParams);
+  const { query, sort, page: requested } = parseListParams(await searchParams);
   const { items, total, page, pages, start } = await listServices({
     query,
     sort,
@@ -60,16 +57,18 @@ async function ServiceListing({
   const status =
     total === 0
       ? "Nessun risultato"
-      : `${plural(total, "risultato", "risultati")}, ordinati ${
-          sort === "count"
-            ? "dal più segnalato"
-            : "dalla segnalazione più recente"
-        }`;
+      : total === 1
+        ? "1 risultato"
+        : `${total} risultati, ordinati ${
+            sort === "count"
+              ? "dal più segnalato"
+              : "dalla segnalazione più recente"
+          }`;
 
   return (
     <>
       <SearchTools query={query} sort={sort} />
-
+      <RememberList url={listHref({ query, sort, page })} />
       <div
         id="risultati"
         tabIndex={-1}
@@ -92,19 +91,16 @@ async function ServiceListing({
                 key={service.id}
                 service={service}
                 rank={sort === "count" ? start + i + 1 : undefined}
-                focusOnArrival={service.slug === from}
               />
             ))}
           </ul>
           {pages > 1 && (
             <Pager
+              label="Pagine dei risultati"
+              summary={`Risultati ${start + 1}–${Math.min(start + PER_PAGE, total)} di ${total} · pagina ${page} di ${pages}`}
               page={page}
               pages={pages}
-              total={total}
-              start={start}
-              perPage={PER_PAGE}
-              query={query}
-              sort={sort}
+              href={(p) => listHref({ query, sort, page: p })}
             />
           )}
           <p className="note mt-3">

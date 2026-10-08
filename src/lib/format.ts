@@ -27,6 +27,11 @@ export function toIsoDate(value: Date | string): string {
     : value.toISOString().slice(0, 10);
 }
 
+/** Etichetta sotto il numero: "1 segnalazione ricevuta", "47 segnalazioni ricevute". */
+export function receivedLabel(n: number): string {
+  return n === 1 ? "segnalazione ricevuta" : "segnalazioni ricevute";
+}
+
 export function plural(n: number, one: string, many: string): string {
   return n === 1 ? `1 ${one}` : `${n} ${many}`;
 }

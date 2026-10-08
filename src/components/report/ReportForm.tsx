@@ -19,12 +19,20 @@ import { FIELD_ID } from "@/lib/validation";
 const BASE_TITLE = "Invia una segnalazione — Barriere Digitali";
 
 /** Il modulo si azzera rimontandolo con una nuova chiave ("Invia un'altra segnalazione"). */
-export function ReportFormContainer({ initialSite }: { initialSite: string }) {
+export function ReportFormContainer({
+  initialSite,
+  postback = null,
+}: {
+  initialSite: string;
+  /** Esito di un invio fatto senza JavaScript (vedi lib/report-postback). */
+  postback?: ReportFormState | null;
+}) {
   const [round, setRound] = useState(0);
   return (
     <ReportForm
       key={round}
       initialSite={round === 0 ? initialSite : ""}
+      postback={round === 0 ? postback : null}
       onReset={() => setRound((r) => r + 1)}
       isReset={round > 0}
     />
@@ -33,14 +41,16 @@ export function ReportFormContainer({ initialSite }: { initialSite: string }) {
 
 function ReportForm({
   initialSite,
+  postback,
   onReset,
   isReset,
 }: {
   initialSite: string;
+  postback: ReportFormState | null;
   onReset: () => void;
   isReset: boolean;
 }) {
-  const initialState: ReportFormState = {
+  const initialState: ReportFormState = postback ?? {
     status: "idle",
     values: { kind: "WEBSITE", site: initialSite, desc: "", email: "" },
   };

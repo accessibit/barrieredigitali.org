@@ -1,44 +1,39 @@
 import type { Route } from "next";
 import Link from "next/link";
 
-import { listHref, pageWindow } from "@/lib/search-params";
-import type { SortOrder } from "@/lib/services";
+import { pageWindow } from "@/lib/search-params";
 
 const box =
   "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-control px-3 font-medium text-ink no-underline tabular-nums hover:border-ink hover:bg-paper hover:text-ink";
 
+/** Paginazione con link reali: funziona anche senza JavaScript. */
 export function Pager({
+  label,
+  summary,
   page,
   pages,
-  total,
-  start,
-  perPage,
-  query,
-  sort,
+  href,
 }: {
+  label: string;
+  summary: string;
   page: number;
   pages: number;
-  total: number;
-  start: number;
-  perPage: number;
-  query: string;
-  sort: SortOrder;
+  href: (page: number) => string;
 }) {
-  const href = (p: number) => listHref({ query, sort, page: p }) as Route;
-  const end = Math.min(start + perPage, total);
+  const to = (p: number) => href(p) as Route;
   return (
     <nav
-      aria-label="Pagine dei risultati"
+      aria-label={label}
       className="mt-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 narrow:justify-center"
     >
       <p className="text-sm text-muted narrow:basis-full narrow:text-center">
-        Risultati {start + 1}–{end} di {total} · pagina {page} di {pages}
+        {summary}
       </p>
       <ul className="m-0 flex list-none flex-wrap items-center gap-1.5 p-0">
         {page > 1 && (
           <li>
             <Link
-              href={href(page - 1)}
+              href={to(page - 1)}
               scroll={false}
               className={`${box} narrow:px-2.5`}
             >
@@ -56,7 +51,7 @@ export function Pager({
           ) : (
             <li key={n}>
               <Link
-                href={href(n)}
+                href={to(n)}
                 scroll={false}
                 aria-label={
                   n === page ? `Pagina ${n}, pagina attuale` : `Pagina ${n}`
@@ -72,7 +67,7 @@ export function Pager({
         {page < pages && (
           <li>
             <Link
-              href={href(page + 1)}
+              href={to(page + 1)}
               scroll={false}
               className={`${box} narrow:px-2.5`}
             >

@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
+import { takeReturnFocus } from "@/lib/list-memory";
+
 // A livello di modulo: il componente può essere rimontato dal suo <Suspense>
 // durante la navigazione, ma l'ultimo percorso visto deve sopravvivere.
 let previousPathname: string | null = null;
@@ -11,7 +13,7 @@ const WATCH_MS = 3000;
 
 /**
  * Dopo una navigazione lato client sposta il focus sul titolo della pagina
- * (o su un elemento con data-route-focus), così chi usa tastiera o lettore
+ * (o sul servizio da cui si torna, nell'elenco), così chi usa tastiera o lettore
  * di schermo riparte dal nuovo contenuto. Al primo caricamento non fa nulla.
  *
  * Il nuovo contenuto può arrivare dopo il cambio di URL (streaming, prefetch):
@@ -30,11 +32,12 @@ export function RouteFocus() {
     if (previousPathname === pathname) return;
     previousPathname = pathname;
 
-    // Tornando dal dettaglio (?da=slug) il focus va sul link del servizio, non sul titolo.
-    const waitForRow = new URLSearchParams(window.location.search).has("da");
+    // Tornando dal dettaglio il focus va sul link del servizio appena visto, non sul titolo.
+    const returnTo = takeReturnFocus();
     const find = () =>
-      document.querySelector<HTMLElement>("[data-route-focus]") ??
-      (waitForRow ? null : document.getElementById("titolo"));
+      returnTo
+        ? document.getElementById(`link-${returnTo}`)
+        : document.getElementById("titolo");
 
     let focused: HTMLElement | null = null;
     const apply = () => {

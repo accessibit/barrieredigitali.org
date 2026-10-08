@@ -32,3 +32,4 @@ export function faviconColor(key: string): string {
 }
 
 export const PER_PAGE = 25;
+export const REPORTS_PER_PAGE = 20;

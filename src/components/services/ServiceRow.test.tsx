@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { Pager } from "@/components/services/Pager";
 import { ServiceRow } from "@/components/services/ServiceRow";
+import { listHref } from "@/lib/search-params";
 import { expectNoAxeViolations } from "@/test/a11y/axe";
 
 const service = {
@@ -40,13 +41,11 @@ describe("Pager", () => {
   it("indica la pagina attuale e nasconde i salti", async () => {
     const { container } = render(
       <Pager
+        label="Pagine dei risultati"
+        summary="Risultati 201–225 di 423 · pagina 9 di 17"
         page={9}
         pages={17}
-        total={423}
-        start={200}
-        perPage={25}
-        query=""
-        sort="count"
+        href={(p) => listHref({ page: p })}
       />,
     );
     const nav = screen.getByRole("navigation", {
