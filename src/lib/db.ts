@@ -7,28 +7,39 @@ import { Pool, type PoolConfig } from "pg";
 import { PrismaClient } from "@/generated/prisma/client";
 import { RDS_CA } from "@/lib/rds-ca";
 
+const LOCAL_HOSTS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "::1",
+  "[::1]",
+  "db",
+  "postgres",
+]);
+
 /**
- * Builds the `pg` pool config from DATABASE_URL.
- *
- * Amazon RDS: TLS is required and the server certificate is verified against
- * the RDS CA, which Node does not trust by default. The `ssl*` URL params
- * (e.g. `sslmode=require`, used by the Prisma CLI) are stripped because they
- * would override the `ssl` option. Locally (Docker) the URL is used as is.
+ * Builds the `pg` pool config from DATABASE_URL. TLS fails closed: only local
+ * hosts (Docker, localhost) connect without TLS. Every other host must present
+ * a valid certificate: Amazon RDS hosts are verified against the RDS CA (which
+ * Node does not trust by default), any other host against the system CAs.
+ * The `ssl*` URL params (e.g. `sslmode=require`, used by the Prisma CLI) are
+ * stripped because they would override the `ssl` option.
  */
 function poolConfig(): PoolConfig {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is not set.");
 
   const parsed = new URL(url);
-  if (!parsed.hostname.endsWith(".rds.amazonaws.com")) {
-    return { connectionString: url };
-  }
+  if (LOCAL_HOSTS.has(parsed.hostname)) return { connectionString: url };
+
   for (const key of [...parsed.searchParams.keys()]) {
     if (key.startsWith("ssl")) parsed.searchParams.delete(key);
   }
+  const isRds = parsed.hostname.endsWith(".rds.amazonaws.com");
   return {
     connectionString: parsed.toString(),
-    ssl: { ca: RDS_CA, rejectUnauthorized: true },
+    ssl: isRds
+      ? { ca: RDS_CA, rejectUnauthorized: true }
+      : { rejectUnauthorized: true },
     max: 10,
     idleTimeoutMillis: 5_000,
   };

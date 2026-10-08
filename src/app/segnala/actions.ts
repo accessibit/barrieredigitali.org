@@ -4,8 +4,13 @@ import { headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { typeOptionLabel } from "@/lib/service-types";
+import {
+  checkSubmission,
+  clientIpHash,
+  LIMITED_MESSAGE,
+} from "@/lib/rate-limit";
 import { rememberErrors, rememberSent } from "@/lib/report-postback";
+import { typeOptionLabel } from "@/lib/service-types";
 import { type ReportField, validateReport } from "@/lib/validation";
 
 export type ReportFormValues = {
@@ -21,12 +26,14 @@ export type ReportFormState =
       status: "error";
       values: ReportFormValues;
       errors: Partial<Record<ReportField, string>>;
+      /** Message not tied to a field (e.g. too many submissions). */
+      notice?: string;
       submission: number;
     }
   | {
       status: "sent";
       values: ReportFormValues;
-      recap: { kindLabel: string; site: string; desc: string; email: string };
+      recap: { typeLabel: string; site: string; desc: string; email: string };
     };
 
 function read(formData: FormData, key: string) {
@@ -61,7 +68,7 @@ export async function submitReport(
   }
 
   const recap = {
-    kindLabel: typeOptionLabel(data.type),
+    typeLabel: typeOptionLabel(data.type),
     site: data.site,
     desc: data.desc,
     email: data.email,
@@ -73,18 +80,46 @@ export async function submitReport(
     return { status: "sent", values, recap };
   }
 
-  const report = await db.report.create({
-    data: {
-      submittedType: data.type,
-      submittedName: data.site,
-      description: data.desc,
-      email: data.email || null,
-    },
-    select: { id: true },
+  const ipHash = await clientIpHash();
+  const check = await checkSubmission(ipHash, {
+    submittedName: data.site,
+    description: data.desc,
   });
 
+  if (check.outcome === "limited") {
+    if (withoutJs) {
+      await rememberErrors(values, {}, LIMITED_MESSAGE);
+      redirect("/segnala", RedirectType.replace);
+    }
+    const submission =
+      previous.status === "error" ? previous.submission + 1 : 1;
+    return {
+      status: "error",
+      values,
+      errors: {},
+      notice: LIMITED_MESSAGE,
+      submission,
+    };
+  }
+
+  const reportId =
+    check.outcome === "duplicate"
+      ? check.reportId
+      : (
+          await db.report.create({
+            data: {
+              submittedType: data.type,
+              submittedName: data.site,
+              description: data.desc,
+              email: data.email || null,
+              ipHash,
+            },
+            select: { id: true },
+          })
+        ).id;
+
   if (withoutJs) {
-    await rememberSent(report.id);
+    await rememberSent(reportId);
     redirect("/segnala", RedirectType.replace);
   }
   return { status: "sent", values, recap };

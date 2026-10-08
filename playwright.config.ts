@@ -35,6 +35,8 @@ export default defineConfig({
     ? undefined
     : {
         command: `npm run build && npx next start -p ${PORT}`,
+        // Enables the per-IP submission limit tested in e2e/form.spec.ts.
+        env: { IP_HASH_SECRET: "e2e" },
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 240_000,

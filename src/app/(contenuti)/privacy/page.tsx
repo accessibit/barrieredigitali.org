@@ -21,6 +21,10 @@ export default function PrivacyPage() {
           problema.
         </li>
         <li>L’email, solo se scegli di lasciarla.</li>
+        <li>
+          Un’impronta cifrata dell’indirizzo IP, che cambia ogni giorno e serve
+          solo a limitare gli invii ripetuti. L’indirizzo IP non viene salvato.
+        </li>
       </ul>
       <h2>Titolare e conservazione</h2>
       <p>

@@ -51,10 +51,28 @@ test.describe("Metadati, icone e header", () => {
     expect(headers["x-content-type-options"]).toBe("nosniff");
     expect(headers["x-frame-options"]).toBe("DENY");
     expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
-    expect(headers["content-security-policy"]).toContain(
-      "frame-ancestors 'none'",
-    );
+    const csp = headers["content-security-policy"] ?? "";
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("connect-src 'self'");
+    expect(csp).toContain("frame-ancestors 'none'");
     expect(headers["x-powered-by"]).toBeUndefined();
+  });
+
+  test("nessuna violazione della Content Security Policy", async ({ page }) => {
+    const violations: string[] = [];
+    page.on("console", (message) => {
+      if (/Content Security Policy|Refused to/i.test(message.text())) {
+        violations.push(message.text());
+      }
+    });
+    for (const path of ["/", "/segnalazioni/inps-it", "/segnala", "/privacy"]) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+    }
+    await page.goto("/segnala");
+    await page.getByRole("button", { name: "Invia segnalazione" }).click();
+    await expect(page.locator("#riepilogo-errori")).toBeVisible();
+    expect(violations).toEqual([]);
   });
 
   test("www reindirizza al dominio principale", async ({ request }) => {

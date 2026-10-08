@@ -12,6 +12,25 @@ const submit = (page: Page) =>
   page.getByRole("button", { name: "Invia segnalazione" });
 const summary = (page: Page) => page.locator("#riepilogo-errori");
 
+/**
+ * Each test gets its own client IP, so the per-IP submission limit
+ * (src/lib/rate-limit.ts) never couples tests together.
+ */
+function randomIp() {
+  const n = () => Math.floor(Math.random() * 254) + 1;
+  return `10.${n()}.${n()}.${n()}`;
+}
+
+test.beforeEach(async ({ page }) => {
+  await page.setExtraHTTPHeaders({ "x-forwarded-for": randomIp() });
+});
+
+async function sendReport(page: Page, name: string, text: string) {
+  await page.goto(`/segnala?servizio=${encodeURIComponent(name)}`);
+  await desc(page).fill(text);
+  await submit(page).click();
+}
+
 test.describe("Modulo di segnalazione", () => {
   test("campi, etichette e suggerimenti", async ({ page }) => {
     await page.goto("/segnala");
@@ -256,6 +275,58 @@ test.describe("Modulo di segnalazione", () => {
   });
 });
 
+test.describe("Protezione dagli abusi", () => {
+  test("un invio ripetuto identico salva una sola segnalazione", async ({
+    page,
+  }) => {
+    const name = uniqueName("doppio");
+    const text = "Lo stesso testo inviato due volte di seguito.";
+    await sendReport(page, name, text);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Grazie, l’abbiamo ricevuta.",
+    );
+    await sendReport(page, name, text);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Grazie, l’abbiamo ricevuta.",
+    );
+    expect(await findReport(name)).toHaveLength(1);
+  });
+
+  test("oltre 5 invii in 10 minuti dallo stesso IP l'invio viene rifiutato", async ({
+    page,
+  }) => {
+    const names: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const name = uniqueName(`limite-${i}`);
+      names.push(name);
+      await sendReport(
+        page,
+        name,
+        `Segnalazione numero ${i + 1} dallo stesso IP.`,
+      );
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+        "Grazie, l’abbiamo ricevuta.",
+      );
+    }
+    const blocked = uniqueName("limite-6");
+    await sendReport(
+      page,
+      blocked,
+      "La sesta segnalazione deve essere rifiutata.",
+    );
+    await expect(summary(page)).toBeFocused();
+    await expect(summary(page)).toContainText(
+      "Non è stato possibile inviare la segnalazione",
+    );
+    await expect(summary(page)).toContainText("Riprova tra qualche minuto.");
+    await expect(desc(page)).toHaveValue(
+      "La sesta segnalazione deve essere rifiutata.",
+    );
+    expect(await findReport(blocked)).toHaveLength(0);
+    for (const name of names) expect(await findReport(name)).toHaveLength(1);
+  });
+});
+
 test.describe("Modulo senza JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 
@@ -294,5 +365,15 @@ test.describe("Modulo senza JavaScript", () => {
       submitted_type: "APP",
       status: "PENDING",
     });
+
+    // The outcome is shown once: a reload starts from an empty form.
+    await page.reload();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Invia una segnalazione",
+    );
+    await expect(site(page)).toHaveValue("");
+    await expect(page).toHaveTitle(
+      "Invia una segnalazione — Barriere Digitali",
+    );
   });
 });

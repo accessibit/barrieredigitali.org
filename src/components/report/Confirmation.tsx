@@ -30,7 +30,7 @@ export function Confirmation({
       )}
       <dl className="mt-6 grid grid-cols-[7rem_minmax(0,1fr)] gap-x-4 gap-y-1.5 border-t border-line pt-4 text-[0.9375rem] narrow:grid-cols-1 narrow:gap-0">
         <dt className="text-muted">Tipo</dt>
-        <dd className="wrap-anywhere narrow:mb-2">{recap.kindLabel}</dd>
+        <dd className="wrap-anywhere narrow:mb-2">{recap.typeLabel}</dd>
         <dt className="text-muted">Nome o indirizzo</dt>
         <dd className="wrap-anywhere narrow:mb-2">{recap.site}</dd>
         <dt className="text-muted">Problema</dt>

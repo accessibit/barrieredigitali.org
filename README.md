@@ -47,10 +47,12 @@ The seed (`prisma/seed.ts`) **refuses to run** if `DATABASE_URL` does not point 
 
 Reports arrive with `status = PENDING` and no linked service. To publish one, open `npm run db:studio` (pointed at the right database) and:
 
-1. Create the `Service` if it does not exist yet. You need `slug`, `name`, `kind`, and `nameNormalized`, which is the name in lowercase without `https://` or `www.`.
+1. Create the `Service` if it does not exist yet. You need `slug`, `name`, `type`, and `nameNormalized`, which is the name in lowercase without `https://` or `www.`.
 2. On the `Report`, set `serviceId`, `status = PUBLISHED` and `publishedAt` (the date shown to the public). Remove any personal data from `description` first.
 
-Counts and dates in the list are computed from published reports, so nothing else needs updating.
+Counts and dates in the list are computed from published reports, so nothing else needs updating. Public pages cache database reads for about a minute (`cacheLife("minutes")` in `src/lib/services.ts`), so a change made in Studio appears within that time. The sitemap refreshes every hour.
+
+**Abuse protection:** each IP can send at most 5 reports in 10 minutes and 20 per day, and an identical report sent again within 10 minutes is not saved twice (`src/lib/rate-limit.ts`). The IP is never stored: only a daily HMAC (`ip_hash`), keyed with `IP_HASH_SECRET`. Without that variable in production, the per-IP limit is off.
 
 ## Accessibility
 
@@ -76,9 +78,9 @@ Counts and dates in the list are computed from published reports, so nothing els
 
 - Functions run in `fra1` (Frankfurt), next to the database.
 - **Database:** Amazon RDS PostgreSQL 18 `barrieredigitali` (`db.t4g.micro`, `eu-central-1`, AWS account `179743357810`). Storage is encrypted, backups are kept for 7 days and deletion protection is on.
-  - The app connects as `bd_app`, owner of the `barrieredigitali` database only. TLS is required: the app verifies the certificate against the RDS CA (`src/lib/db-connection.ts`); `DATABASE_URL` carries `sslmode=require` for the Prisma migrations.
+  - The app connects as `bd_app`, owner of the `barrieredigitali` database only. TLS is required: the app verifies the certificate against the RDS CA (`src/lib/db.ts`); any non-local host must use verified TLS; `DATABASE_URL` carries `sslmode=require` for the Prisma migrations.
   - Credentials for `bd_admin` and `bd_app` are in AWS Secrets Manager (`barrieredigitali/db`).
   - Port 5432 is open to the internet (security group `barrieredigitali-db`), because Vercel has no fixed IPs.
-- **Environment variables (Production):** `DATABASE_URL` (user `bd_app`) and `SITE_URL` (`https://barrieredigitali.org`).
+- **Environment variables (Production):** `DATABASE_URL` (user `bd_app`), `IP_HASH_SECRET` (random, for the submission limit) and `SITE_URL` (`https://barrieredigitali.org`).
 - **Migrations:** `vercel-build` runs `prisma migrate deploy` only on production builds; previews do not touch the database. Never run the seed in production.
 - **Locally:** `DATABASE_URL` points to the Postgres in Docker.

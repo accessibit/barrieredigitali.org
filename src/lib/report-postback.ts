@@ -1,10 +1,11 @@
 import "server-only";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { cache } from "react";
 
 import type { ReportFormState, ReportFormValues } from "@/app/segnala/actions";
 import { db } from "@/lib/db";
+import { POSTBACK } from "@/lib/postback-keys";
 import { typeOptionLabel } from "@/lib/service-types";
 import type { ReportField } from "@/lib/validation";
 
@@ -14,10 +15,11 @@ import type { ReportField } from "@/lib/validation";
  * With Cache Components, Next does not pass the useActionState state to the
  * HTML generated after a submission without JavaScript. In that case the
  * action saves the outcome in a short-lived cookie and redirects to
- * /segnala, which reads it back. With JavaScript enabled this path is never used.
+ * /segnala. `src/proxy.ts` turns the cookie into a request header and deletes
+ * it, so the outcome is shown once. With JavaScript enabled this path is never used.
  */
-const ERRORS_COOKIE = "bd_modulo";
-const SENT_COOKIE = "bd_inviata";
+const ERRORS_COOKIE = POSTBACK.errorsCookie;
+const SENT_COOKIE = POSTBACK.sentCookie;
 const MAX_AGE = 60;
 const MAX_COOKIE_BYTES = 3500;
 
@@ -25,18 +27,23 @@ const options = {
   httpOnly: true,
   sameSite: "lax" as const,
   secure: process.env.NODE_ENV === "production",
-  path: "/segnala",
+  path: POSTBACK.path,
   maxAge: MAX_AGE,
 };
 
 export async function rememberErrors(
   values: ReportFormValues,
   errors: Partial<Record<ReportField, string>>,
+  notice?: string,
 ) {
-  let payload = JSON.stringify({ values, errors });
+  let payload = JSON.stringify({ values, errors, notice });
   // A cookie cannot exceed ~4 KB: a very long description is not kept.
   if (encodeURIComponent(payload).length > MAX_COOKIE_BYTES) {
-    payload = JSON.stringify({ values: { ...values, desc: "" }, errors });
+    payload = JSON.stringify({
+      values: { ...values, desc: "" },
+      errors,
+      notice,
+    });
   }
   const store = await cookies();
   store.delete({ name: SENT_COOKIE, path: options.path });
@@ -56,12 +63,20 @@ function isStringRecord(value: unknown): value is Record<string, unknown> {
 
 const str = (value: unknown) => (typeof value === "string" ? value : "");
 
-/** Initial form state after a submission without JavaScript, if any. */
+function decodeHeader(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
+}
+
+/** Initial form state after a submission without JavaScript, if any (set by `src/proxy.ts`). */
 export const readPostback = cache(
   async function readPostback(): Promise<ReportFormState | null> {
-    const store = await cookies();
-
-    const sentId = store.get(SENT_COOKIE)?.value;
+    const h = await headers();
+    const sentId = decodeHeader(h.get(POSTBACK.sentHeader));
     if (sentId) {
       const report = await db.report.findFirst({
         where: {
@@ -87,14 +102,14 @@ export const readPostback = cache(
           status: "sent",
           values,
           recap: {
-            kindLabel: typeOptionLabel(report.submittedType),
+            typeLabel: typeOptionLabel(report.submittedType),
             ...values,
           },
         };
       }
     }
 
-    const raw = store.get(ERRORS_COOKIE)?.value;
+    const raw = decodeHeader(h.get(POSTBACK.errorsHeader));
     if (raw) {
       try {
         const parsed: unknown = JSON.parse(raw);
@@ -118,6 +133,7 @@ export const readPostback = cache(
               email: str(v.email),
             },
             errors,
+            notice: str(parsed.notice) || undefined,
             submission: 1,
           };
         }

@@ -54,8 +54,12 @@ model Report {
   updatedAt     DateTime     @updatedAt @map("updated_at")
   /// Date shown to the public. Must be set when the report is published.
   publishedAt   DateTime?    @map("published_at")
+  /// Daily HMAC of the sender's IP, used only to rate-limit submissions.
+  /// The IP itself is never stored, and hashes from different days cannot be linked.
+  ipHash        String?      @map("ip_hash")
 
   @@index([serviceId, status, publishedAt])
   @@index([status, createdAt])
+  @@index([ipHash, createdAt])
   @@map("reports")
 }

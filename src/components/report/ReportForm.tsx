@@ -105,7 +105,11 @@ function ReportForm({
         redazione legge ogni segnalazione e toglie eventuali dati personali.
       </p>
 
-      <ErrorSummary ref={summaryRef} errors={errors} />
+      <ErrorSummary
+        ref={summaryRef}
+        errors={errors}
+        notice={state.status === "error" ? state.notice : undefined}
+      />
 
       <form
         action={formAction}
