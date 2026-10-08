@@ -74,4 +74,8 @@ Counts and dates in the list are computed from published reports, so nothing els
 
 ## Deploy (Vercel)
 
-Required environment variables: `DATABASE_URL` (production Postgres) and `SITE_URL` (`https://barrieredigitali.org`). On Vercel the `vercel-build` script applies the migrations (`prisma migrate deploy`) before every **production** build; preview builds do not touch the database. Never run the seed in production.
+- Functions run in `fra1` (Frankfurt), next to the database.
+- **Database:** Amazon Aurora PostgreSQL connected through the Vercel Marketplace (integration `aws/aws-apg`), on the production environment only. There is no password: the app signs a 15-minute IAM token with the project's OIDC credentials (`src/lib/db-connection.ts`), over TLS verified with the RDS CA. The variables (`PGHOST`, `PGUSER`, `AWS_ROLE_ARN`, …) are set by the integration.
+- **Migrations:** `vercel-build` applies them (`scripts/migrate.ts`, which signs a token and runs `prisma migrate deploy`) only on production builds; previews do not touch the database. Never run the seed in production.
+- **Locally:** `DATABASE_URL` points to the Postgres in Docker.
+- `SITE_URL`: `https://barrieredigitali.org`.
