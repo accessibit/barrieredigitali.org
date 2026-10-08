@@ -62,4 +62,4 @@ Counts and dates in the list are computed from published reports, so nothing els
 
 ## Deploy (Vercel)
 
-Required environment variables: `DATABASE_URL` (production Postgres) and `SITE_URL` (`https://barrieredigitali.org`). Migrations are applied with `npm run db:deploy`; never run the seed in production.
+Required environment variables: `DATABASE_URL` (production Postgres) and `SITE_URL` (`https://barrieredigitali.org`). On Vercel the `vercel-build` script applies the migrations (`prisma migrate deploy`) before every **production** build; preview builds do not touch the database. Never run the seed in production.

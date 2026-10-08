@@ -22,7 +22,8 @@
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
     "postinstall": "prisma generate",
-    "prepare": "husky"
+    "prepare": "husky",
+    "vercel-build": "prisma generate && if [ \"$VERCEL_ENV\" = \"production\" ]; then prisma migrate deploy; fi && next build"
   },
   "dependencies": {
     "@prisma/adapter-pg": "~7.10.0",
