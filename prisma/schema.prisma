@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Tipo di servizio digitale segnalato.
+enum ServiceKind {
+  WEBSITE
+  APP
+  DOCUMENT
+  OTHER
+}
+
+/// Stato di moderazione di una segnalazione.
+enum ReportStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
+/// Un sito, un'app, un documento o un altro servizio digitale con segnalazioni pubblicate.
+model Service {
+  id             String      @id @default(cuid())
+  slug           String      @unique
+  name           String
+  /// Nome normalizzato (minuscolo, senza protocollo né "www.") usato per la ricerca.
+  nameNormalized String      @map("name_normalized")
+  kind           ServiceKind
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  reports        Report[]
+
+  @@index([nameNormalized])
+  @@map("services")
+}
+
+/// Una segnalazione inviata dal pubblico. Viene collegata a un servizio
+/// e pubblicata solo dopo la verifica della redazione.
+model Report {
+  id            String       @id @default(cuid())
+  serviceId     String?      @map("service_id")
+  service       Service?     @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  submittedKind ServiceKind  @map("submitted_kind")
+  submittedName String       @map("submitted_name")
+  description   String
+  /// Facoltativa, mai pubblicata.
+  email         String?
+  status        ReportStatus @default(PENDING)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  /// Data mostrata al pubblico. Va impostata quando la segnalazione viene pubblicata.
+  publishedAt   DateTime?    @map("published_at")
+
+  @@index([serviceId, status, publishedAt])
+  @@index([status, createdAt])
+  @@map("reports")
+}

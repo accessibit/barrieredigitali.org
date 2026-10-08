@@ -1,0 +1,225 @@
+@import "tailwindcss";
+
+/*
+ * Barriere Digitali: tokens from the design.
+ * Contrast ratios against white are noted next to each colour.
+ */
+@theme {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  --color-ink: #111111; /* 18.9:1 */
+  --color-muted: #545a64; /* 7.0:1 */
+  --color-body: #2b2f36;
+  --color-line: #e2e3e6;
+  --color-control: #767b84; /* 4.4:1: borders of fields and buttons */
+  --color-paper: #f5f5f4;
+  --color-hover: #fafaf9;
+  --color-accent: #1f3fbf; /* 8.3:1 */
+  --color-accent-dark: #172f8f;
+  --color-accent-soft: #eef1fb;
+  --color-accent-soft-hover: #e2e8fa;
+  --color-count-label: #3f4552;
+  --color-error: #b3261e; /* 6.6:1 */
+  --color-ok: #1b6b3a; /* 6.6:1 */
+  --color-placeholder: #646a74;
+  --color-mark: #fff4c2;
+
+  --container-page: 56rem;
+  --container-header: 72rem;
+}
+
+/* Breakpoint used throughout the design: container narrower than 760px. */
+@custom-variant narrow {
+  @container (max-width: 47.5rem) {
+    @slot;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-white font-sans text-base/normal text-ink antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  p,
+  ol,
+  ul,
+  dl,
+  dd {
+    margin: 0;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-underline-offset: 0.2em;
+  }
+
+  a:hover {
+    color: var(--color-accent-dark);
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px #fff;
+  }
+
+  [tabindex="-1"]:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto max-w-page px-10 narrow:px-4;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-accent bg-accent px-[1.125rem] py-2 text-center text-[0.9375rem] font-semibold text-white no-underline;
+  }
+  .btn:hover {
+    @apply border-accent-dark bg-accent-dark;
+  }
+  a.btn,
+  a.btn:visited,
+  a.btn:hover {
+    @apply text-white no-underline;
+  }
+  .btn-quiet,
+  a.btn-quiet,
+  a.btn-quiet:visited {
+    @apply border-control bg-white text-ink;
+  }
+  .btn-quiet:hover,
+  a.btn-quiet:hover {
+    @apply border-ink bg-paper text-ink;
+  }
+  .btn-cta {
+    @apply min-h-12 px-5 py-3 text-base narrow:min-h-11 narrow:px-3.5 narrow:py-2 narrow:text-[0.9375rem];
+  }
+  .btn-stretch {
+    @apply narrow:w-full;
+  }
+
+  /* Form controls */
+  .label {
+    @apply mb-1.5 block text-[0.9375rem] font-semibold;
+  }
+  .hint {
+    @apply mb-2 block text-[0.9375rem] text-muted;
+  }
+  .input {
+    @apply min-h-12 w-full rounded-md border border-control bg-white px-3.5 py-2.5 text-base;
+  }
+  .input:hover {
+    @apply border-ink;
+  }
+  .input::placeholder {
+    color: var(--color-placeholder);
+  }
+  .input[aria-invalid="true"] {
+    @apply border-2 border-error;
+  }
+
+  /* Small grey note */
+  .note {
+    @apply text-sm text-muted;
+  }
+  .note strong {
+    @apply font-semibold text-ink;
+  }
+
+  /* Inner pages */
+  .page {
+    @apply max-w-176 pt-5 pb-4;
+  }
+  .page h1 {
+    @apply mt-3 text-[1.75rem]/[1.2] font-bold tracking-[-0.03em] wrap-anywhere narrow:text-[1.375rem];
+  }
+  .lead {
+    @apply mt-2 text-[1.0625rem] text-muted;
+  }
+  a.back {
+    @apply inline-flex min-h-11 items-center font-medium;
+  }
+
+  .prose-bd h2 {
+    @apply mt-8 text-lg font-semibold tracking-[-0.01em];
+  }
+  .prose-bd p {
+    @apply mt-2.5 max-w-[64ch];
+  }
+  .prose-bd ol {
+    @apply mt-3 grid list-decimal gap-2.5 pl-5;
+  }
+  .prose-bd ul {
+    @apply mt-3 grid list-disc gap-1.5 pl-5;
+  }
+  .prose-bd ol li::marker {
+    @apply font-bold;
+  }
+
+  .placeholder-mark {
+    @apply rounded-[3px] bg-mark px-1;
+  }
+
+  /*
+   * Row with a stretched link: the whole row is clickable, but only the
+   * service name is announced as a link.
+   */
+  a.rowlink {
+    @apply text-ink no-underline;
+  }
+  a.rowlink::after {
+    content: "";
+    @apply absolute inset-0 rounded-[10px];
+  }
+  .row:hover a.rowlink {
+    @apply underline underline-offset-[0.2em];
+  }
+  a.rowlink:focus-visible {
+    @apply underline;
+    outline: none;
+    box-shadow: none;
+  }
+  a.rowlink:focus-visible::after {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  /* Segmented control: focus ring inside the button */
+  .seg button:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: -6px;
+    box-shadow: none;
+  }
+  .seg button[aria-pressed="true"]:focus-visible {
+    outline-color: #fff;
+  }
+}
