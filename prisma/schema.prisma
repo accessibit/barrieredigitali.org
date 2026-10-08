@@ -15,6 +15,14 @@ enum ServiceType {
   OTHER
 }
 
+/// Who produced a report. Not shown on the site; kept for traceability.
+enum ReportSource {
+  /// Submitted by a member of the public through the form.
+  PUBLIC
+  /// Found by the editorial team while auditing a service (see scripts/audit).
+  EDITORIAL
+}
+
 /// Moderation status of a report.
 enum ReportStatus {
   PENDING
@@ -54,6 +62,10 @@ model Report {
   updatedAt     DateTime     @updatedAt @map("updated_at")
   /// Date shown to the public. Must be set when the report is published.
   publishedAt   DateTime?    @map("published_at")
+  source        ReportSource @default(PUBLIC)
+  /// Proof behind an editorial report: page URL, audit date, rule, WCAG
+  /// criteria and affected elements. Never published.
+  evidence      Json?
   /// Daily HMAC of the sender's IP, used only to rate-limit submissions.
   /// The IP itself is never stored, and hashes from different days cannot be linked.
   ipHash        String?      @map("ip_hash")

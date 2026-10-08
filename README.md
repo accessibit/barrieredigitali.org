@@ -54,6 +54,23 @@ Counts and dates in the list are computed from published reports, so nothing els
 
 **Abuse protection:** each IP can send at most 5 reports in 10 minutes and 20 per day, and an identical report sent again within 10 minutes is not saved twice (`src/lib/rate-limit.ts`). The IP is never stored: only a daily HMAC (`ip_hash`), keyed with `IP_HASH_SECRET`. Without that variable in production, the per-IP limit is off.
 
+## Editorial audits
+
+To give the site a base of real reports before the public ones arrive, the editorial team audits well-known Italian websites (`scripts/audit/targets.ts`).
+
+```bash
+npm run audit:scan                    # or: npm run audit:scan -- inps.it tim.it
+# review audit-results/<date>.md, then:
+npm run audit:import -- audit-results/<date>.json            # local DB, as PENDING
+npm run audit:import -- audit-results/<date>.json --publish  # local DB, published
+DATABASE_URL=… npm run audit:import -- audit-results/<date>.json --publish --remote  # production
+```
+
+- `scan` checks the home page and up to two key pages (contacts, services, accessibility, help) with axe-core WCAG 2.2 AA and a reflow check at 320 px.
+- Only serious or critical problems that have a curated Italian text in `scripts/audit/rules.ts` become reports, with at most 6 per service. Any other finding is dropped, so no generic or unverified text is published.
+- Each report stores its proof in `reports.evidence`: page URL, date, rule, WCAG criteria and affected elements. `reports.source` is `EDITORIAL`. Neither is shown on the site.
+- Importing is idempotent: the same text for the same service is never inserted twice.
+
 ## Accessibility
 
 - Skip link, landmarks, `aria-current` in the menus, focus moved to the heading after every navigation, and back to the service you came from when returning to the list (same search, sort and page).
