@@ -147,7 +147,7 @@ export function SearchTools({
             onClick={(e) => pickSort(e, "recent")}
             className={`${segButton} border-l border-ink`}
           >
-            Segnalazioni più recenti
+            Più recenti
           </button>
         </div>
       </fieldset>

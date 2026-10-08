@@ -66,18 +66,16 @@ test.describe("Elenco", () => {
 });
 
 test.describe("Ordinamento", () => {
-  test('"Segnalazioni più recenti" ordina per data e toglie la posizione', async ({
+  test('"Più recenti" ordina per data e toglie la posizione', async ({
     page,
   }) => {
     await page.goto("/");
     await settled(page);
-    await page
-      .getByRole("button", { name: "Segnalazioni più recenti" })
-      .click();
+    await page.getByRole("button", { name: "Più recenti" }).click();
     await expect(page).toHaveURL(/ordina=recenti/);
     await expect(page.getByRole("status")).toHaveText(BY_DATE);
     await expect(
-      page.getByRole("button", { name: "Segnalazioni più recenti" }),
+      page.getByRole("button", { name: "Più recenti" }),
     ).toHaveAttribute("aria-pressed", "true");
     await expect(
       page.getByRole("button", { name: "Più segnalati" }),
@@ -98,9 +96,7 @@ test.describe("Ordinamento", () => {
   }) => {
     await page.goto("/?q=comune&pagina=2");
     await settled(page);
-    await page
-      .getByRole("button", { name: "Segnalazioni più recenti" })
-      .click();
+    await page.getByRole("button", { name: "Più recenti" }).click();
     await expect(page).toHaveURL(/q=comune/);
     await expect(page).toHaveURL(/ordina=recenti/);
     await expect(page).not.toHaveURL(/pagina=/);
@@ -290,9 +286,7 @@ test.describe("Senza JavaScript", () => {
     await page.getByRole("link", { name: "Cancella la ricerca" }).click();
     await expect(page.getByRole("status")).toHaveText(BY_COUNT);
 
-    await page
-      .getByRole("button", { name: "Segnalazioni più recenti" })
-      .click();
+    await page.getByRole("button", { name: "Più recenti" }).click();
     await expect(page).toHaveURL(/ordina=recenti/);
     await expect(page.getByRole("status")).toHaveText(BY_DATE);
 
