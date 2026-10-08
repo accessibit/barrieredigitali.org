@@ -1,7 +1,10 @@
 /**
- * Contatti e dati dell'organizzazione. Finché non sono definiti restano
- * segnaposto, evidenziati nelle pagine come nel design.
+ * Contacts and organization details. Until they are defined they remain
+ * placeholders, highlighted on the pages as in the design.
  */
+/** Public URL of the site (sitemap, robots.txt, canonical and Open Graph URLs). */
+export const SITE_URL = process.env.SITE_URL ?? "https://barrieredigitali.org";
+
 export const SITE = {
   name: "Barriere Digitali",
   editorialEmail: null as string | null, // [EMAIL REDAZIONE]
@@ -13,8 +16,8 @@ export const SITE = {
   emailRetention: null as string | null, // [PERIODO]
 };
 
-/** Colori delle iniziali, come nel design (tutti con contrasto ≥ 4.5:1 sul bianco). */
-export const FAVICON_COLORS = [
+/** Colours of the initials, as in the design (all with contrast ≥ 4.5:1 on white). */
+const FAVICON_COLORS = [
   "#1f3fbf",
   "#8a3b12",
   "#1b6b3a",

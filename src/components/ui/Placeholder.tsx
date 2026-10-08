@@ -1,4 +1,4 @@
-/** Mostra il valore, oppure un segnaposto evidenziato finché il dato non è definito. */
+/** Shows the value, or a highlighted placeholder until the data is defined. */
 export function Placeholder({
   value,
   label,

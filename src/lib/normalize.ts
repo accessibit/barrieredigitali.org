@@ -1,6 +1,6 @@
 /**
- * Normalizza il nome o l'indirizzo di un servizio per la ricerca:
- * minuscolo, senza protocollo, senza "www." e senza percorso.
+ * Normalizes the name or address of a service for search:
+ * lowercase, without protocol, without "www." and without path.
  */
 export function normalizeName(value: string | null | undefined): string {
   return String(value ?? "")
@@ -11,7 +11,7 @@ export function normalizeName(value: string | null | undefined): string {
     .replace(/\/.*$/, "");
 }
 
-/** Crea uno slug leggibile per l'URL della pagina di dettaglio. */
+/** Creates a readable slug for the detail page URL. */
 export function slugify(value: string): string {
   return (
     normalizeName(value)

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import {
-  KIND_LABEL,
+  TYPE_LABEL,
   received,
   SECOND,
   SINGLE,
@@ -23,7 +23,7 @@ test.describe("Dettaglio di un servizio", () => {
     );
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(TOP.name);
     await expect(
-      page.getByText(`${KIND_LABEL[TOP.kind]} · Ultima segnalazione:`),
+      page.getByText(`${TYPE_LABEL[TOP.type]} · Ultima segnalazione:`),
     ).toBeVisible();
     await expect(page.getByRole("article")).toContainText(
       `${TOP.count}${received(TOP.count)}`,

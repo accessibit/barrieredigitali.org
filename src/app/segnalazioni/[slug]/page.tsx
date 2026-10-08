@@ -7,7 +7,7 @@ import { Favicon } from "@/components/services/Favicon";
 import { FocusOnChange } from "@/components/services/FocusOnChange";
 import { Pager } from "@/components/services/Pager";
 import { formatDate, plural, receivedLabel, toIsoDate } from "@/lib/format";
-import { KIND_LABEL } from "@/lib/kinds";
+import { TYPE_LABEL } from "@/lib/service-types";
 import { last } from "@/lib/search-params";
 import { getService, getServiceReports } from "@/lib/services";
 import { REPORTS_PER_PAGE } from "@/lib/site";
@@ -26,9 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Pagina "bloccante": il server invia l'HTML completo, senza contenuti in
- * streaming. Così elenco, ricerca e modulo funzionano anche senza JavaScript
- * e non c'è salto di layout durante il caricamento.
+ * "Blocking" page: the server sends the complete HTML, with no streamed
+ * content. This way the list, search and form also work without JavaScript
+ * and there is no layout shift while loading.
  */
 export const instant = false;
 
@@ -72,7 +72,7 @@ async function ServiceDetail({
             {service.name}
           </h1>
           <p className="mt-0.5 text-sm text-muted">
-            {KIND_LABEL[service.kind]} · Ultima segnalazione:{" "}
+            {TYPE_LABEL[service.type]} · Ultima segnalazione:{" "}
             <time dateTime={toIsoDate(service.lastReportAt)}>
               {formatDate(service.lastReportAt)}
             </time>

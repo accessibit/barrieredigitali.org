@@ -5,14 +5,14 @@ import { validateReport } from "@/lib/validation";
 describe("validateReport", () => {
   it("accetta una segnalazione completa senza email", () => {
     const { data, errors } = validateReport({
-      kind: "APP",
+      type: "APP",
       site: " Banca Example ",
       desc: "Il codice SMS scade troppo in fretta.",
       email: "",
     });
     expect(errors).toBeNull();
     expect(data).toMatchObject({
-      kind: "APP",
+      type: "APP",
       site: "Banca Example",
       email: "",
     });
@@ -41,10 +41,10 @@ describe("validateReport", () => {
   it("ripiega su Sito web per un tipo sconosciuto", () => {
     expect(
       validateReport({
-        kind: "hack",
+        type: "hack",
         site: "x",
         desc: "descrizione abbastanza lunga",
-      }).data?.kind,
+      }).data?.type,
     ).toBe("WEBSITE");
   });
 });

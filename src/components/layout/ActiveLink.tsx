@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-/** Link con aria-current="page" quando corrisponde alla pagina attuale (legge l'URL). */
+/** Link with aria-current="page" when it matches the current page (reads the URL). */
 export function ActiveLink({
   href,
   match = "exact",

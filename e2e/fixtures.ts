@@ -2,7 +2,7 @@ import { SEED_SERVICES } from "../prisma/seed-data";
 import { slugify } from "../src/lib/normalize";
 import { PER_PAGE, REPORTS_PER_PAGE } from "../src/lib/site";
 
-/** Aspettative dei test ricavate dai dati del seed locale. */
+/** Test expectations derived from the local seed data. */
 const byCount = [...SEED_SERVICES].sort((a, b) => b.count - a.count);
 
 export const TOTAL = SEED_SERVICES.length;
@@ -14,28 +14,28 @@ const withSlug = (s: (typeof SEED_SERVICES)[number]) => ({
   slug: slugify(s.name),
 });
 
-/** Il servizio più segnalato (conteggio unico) e il secondo. */
+/** The most reported service (unique count) and the second one. */
 export const TOP = withSlug(byCount[0]!);
 export const SECOND = withSlug(byCount[1]!);
 if (TOP.count === SECOND.count)
   throw new Error("Il seed deve avere un primo servizio unico.");
 export const TOP_REPORT_PAGES = Math.ceil(TOP.count / REPORTS_PER_PAGE);
 
-/** Un servizio con una sola segnalazione. */
+/** A service with a single report. */
 export const SINGLE = withSlug(SEED_SERVICES.find((s) => s.count === 1)!);
 
-/** Una ricerca con un solo risultato. */
+/** A search with a single result. */
 export const UNIQUE_QUERY = "satispay";
 export const UNIQUE_RESULT = withSlug(
   SEED_SERVICES.find((s) => /satispay/i.test(s.name))!,
 );
 
-/** Un servizio il cui nome contiene punti, per la ricerca senza separatori. */
+/** A service whose name contains dots, for the separator-insensitive search. */
 export const DOTTED = withSlug(
   SEED_SERVICES.find((s) => s.name === "comune.milano.it")!,
 );
 
-export const KIND_LABEL = {
+export const TYPE_LABEL = {
   WEBSITE: "Sito web",
   APP: "App",
   DOCUMENT: "Documento PDF",

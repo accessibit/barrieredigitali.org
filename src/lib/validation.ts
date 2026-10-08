@@ -1,17 +1,17 @@
 import { z } from "zod";
 
-import { KIND_OPTIONS } from "@/lib/kinds";
+import { TYPE_OPTIONS } from "@/lib/service-types";
 
-const KINDS = KIND_OPTIONS.map((o) => o.value) as [
-  (typeof KIND_OPTIONS)[number]["value"],
-  ...(typeof KIND_OPTIONS)[number]["value"][],
+const KINDS = TYPE_OPTIONS.map((o) => o.value) as [
+  (typeof TYPE_OPTIONS)[number]["value"],
+  ...(typeof TYPE_OPTIONS)[number]["value"][],
 ];
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-/** Messaggi identici al design: vengono letti dopo "Errore: ". */
-export const reportSchema = z.object({
-  kind: z.enum(KINDS).catch("WEBSITE"),
+/** Messages identical to the design: they are read after "Errore: ". */
+const reportSchema = z.object({
+  type: z.enum(KINDS).catch("WEBSITE"),
   site: z
     .string()
     .trim()
@@ -36,7 +36,6 @@ export const reportSchema = z.object({
     ),
 });
 
-export type ReportInput = z.infer<typeof reportSchema>;
 export type ReportField = "site" | "desc" | "email";
 
 export const FIELD_LABEL: Record<ReportField, string> = {
@@ -53,7 +52,7 @@ export const FIELD_ID: Record<ReportField, string> = {
 
 export function validateReport(raw: Record<string, unknown>) {
   const result = reportSchema.safeParse({
-    kind: raw.kind ?? "WEBSITE",
+    type: raw.type ?? "WEBSITE",
     site: typeof raw.site === "string" ? raw.site : "",
     desc: typeof raw.desc === "string" ? raw.desc : "",
     email: typeof raw.email === "string" ? raw.email : "",

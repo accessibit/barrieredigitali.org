@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Quando `value` cambia (non al primo render) porta il focus sull'elemento
- * `targetId` e lo fa scorrere in vista. Usato per il cambio di pagina.
+ * When `value` changes (not on first render), moves focus to the element
+ * `targetId` and scrolls it into view. Used when changing page.
  */
 export function FocusOnChange({
   value,

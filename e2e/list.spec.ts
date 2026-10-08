@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import {
   DOTTED,
-  KIND_LABEL,
+  TYPE_LABEL,
   LAST_PAGE_ROWS,
   PAGES,
   received,
@@ -30,7 +30,7 @@ test.describe("Elenco", () => {
     expect(counts).toEqual([...counts].sort((a, b) => b - a));
     const first = rows(page).first();
     await expect(first.getByRole("heading", { level: 2 })).toHaveText(
-      `1. ${TOP.name} ${KIND_LABEL[TOP.kind]}`,
+      `1. ${TOP.name} ${TYPE_LABEL[TOP.type]}`,
     );
     await expect(first).toContainText(`${TOP.count}${received(TOP.count)}`);
     await expect(
@@ -55,7 +55,7 @@ test.describe("Elenco", () => {
     await settled(page);
     const row = rows(page).nth(1);
     await expect(row.getByRole("link")).toHaveCount(1);
-    // Click sul riquadro del conteggio, fuori dal nome: lo copre il link esteso alla riga.
+    // Click on the count box, outside the name: it is covered by the link stretched over the row.
     const box = (await row.locator("b").boundingBox())!;
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
     await expect(page).toHaveURL(`/segnalazioni/${SECOND.slug}`);

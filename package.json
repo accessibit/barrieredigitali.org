@@ -16,21 +16,19 @@
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
     "db:migrate": "prisma migrate dev",
-    "db:deploy": "tsx scripts/migrate.ts",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
     "postinstall": "prisma generate",
     "prepare": "husky",
-    "vercel-build": "prisma generate && if [ \"$VERCEL_ENV\" = \"production\" ]; then tsx scripts/migrate.ts; fi && next build"
+    "vercel-build": "prisma generate && if [ \"$VERCEL_ENV\" = \"production\" ]; then prisma migrate deploy; fi && next build"
   },
   "dependencies": {
-    "@aws-sdk/rds-signer": "^3.1147.0",
     "@prisma/adapter-pg": "~7.10.0",
     "@prisma/client": "~7.10.0",
     "@vercel/functions": "^3.9.11",
-    "@vercel/oidc-aws-credentials-provider": "^3.3.11",
     "next": "^16.4.0",
     "pg": "^8.23.1",
     "react": "^19.3.0",

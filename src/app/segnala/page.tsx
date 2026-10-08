@@ -8,7 +8,7 @@ const description =
   "Segnala un sito, un’app, un documento o un altro servizio digitale che non sei riuscito a usare. Non serve un account.";
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Dopo un invio senza JavaScript il titolo riflette l'esito, come fa il client.
+  // After a submission without JavaScript the title reflects the outcome, as the client does.
   const postback = await readPostback();
   const title =
     postback?.status === "sent"
@@ -20,9 +20,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Pagina "bloccante": il server invia l'HTML completo, senza contenuti in
- * streaming. Così elenco, ricerca e modulo funzionano anche senza JavaScript
- * e non c'è salto di layout durante il caricamento.
+ * "Blocking" page: the server sends the complete HTML, with no streamed
+ * content. This way the list, search and form also work without JavaScript
+ * and there is no layout shift while loading.
  */
 export const instant = false;
 

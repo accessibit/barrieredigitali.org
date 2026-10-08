@@ -13,8 +13,8 @@ const segButton =
   "min-h-12 flex-auto cursor-pointer border-0 bg-white px-4 py-2 text-[0.9375rem] font-medium whitespace-nowrap text-ink hover:bg-paper aria-pressed:bg-ink aria-pressed:font-bold aria-pressed:text-white narrow:basis-1/2 narrow:p-2 narrow:whitespace-normal";
 
 /**
- * Ricerca e ordinamento. Funziona anche senza JavaScript (form GET);
- * con JavaScript i risultati si aggiornano mentre si scrive.
+ * Search and sorting. Also works without JavaScript (GET form);
+ * with JavaScript the results update while typing.
  */
 export function SearchTools({
   query,
@@ -28,11 +28,11 @@ export function SearchTools({
   const inputRef = useRef<HTMLInputElement>(null);
   const timer = useRef<number | undefined>(undefined);
 
-  // Allinea il campo se la ricerca cambia da fuori (es. "Mostra tutte le segnalazioni").
+  // Syncs the field if the search changes from outside (e.g. "Mostra tutte le segnalazioni").
   const [syncedQuery, setSyncedQuery] = useState(query);
   if (query !== syncedQuery) {
     setSyncedQuery(query);
-    // Non sovrascrivere ciò che si sta scrivendo (es. lo spazio finale non va nell'URL).
+    // Do not overwrite what is being typed (e.g. the trailing space is not in the URL).
     if (query !== value.trim()) setValue(query);
   }
 
@@ -72,7 +72,7 @@ export function SearchTools({
       onSubmit={() => window.clearTimeout(timer.current)}
       className="flex flex-wrap items-end gap-x-6 gap-y-4 pt-4 pb-5 narrow:gap-3.5 narrow:pt-3 narrow:pb-4"
     >
-      {/* Pulsante predefinito per l'invio con Invio: mantiene l'ordinamento attuale. */}
+      {/* Default button for submitting with Enter: keeps the current sort order. */}
       <button
         type="submit"
         className="sr-only"

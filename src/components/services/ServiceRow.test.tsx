@@ -10,7 +10,7 @@ const service = {
   id: "1",
   slug: "negozio-example",
   name: "negozio.example",
-  kind: "WEBSITE" as const,
+  type: "WEBSITE" as const,
   count: 47,
   lastReportAt: new Date("2026-10-02T12:00:00Z"),
 };

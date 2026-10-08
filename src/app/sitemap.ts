@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { cacheLife } from "next/cache";
 
-const SITE_URL = process.env.SITE_URL ?? "https://barrieredigitali.org";
+import { SITE_URL } from "@/lib/site";
 
 const PATHS = [
   "/",
@@ -36,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })),
     ];
   } catch {
-    // Senza database (es. in fase di build) la sitemap contiene solo le pagine fisse.
+    // Without a database (e.g. at build time) the sitemap contains only the static pages.
     return pages;
   }
 }

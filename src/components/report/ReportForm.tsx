@@ -13,18 +13,18 @@ import { type ReportFormState, submitReport } from "@/app/segnala/actions";
 import { Confirmation } from "@/components/report/Confirmation";
 import { ErrorSummary } from "@/components/report/ErrorSummary";
 import { Field } from "@/components/report/Field";
-import { KIND_OPTIONS } from "@/lib/kinds";
+import { TYPE_OPTIONS } from "@/lib/service-types";
 import { FIELD_ID } from "@/lib/validation";
 
 const BASE_TITLE = "Invia una segnalazione — Barriere Digitali";
 
-/** Il modulo si azzera rimontandolo con una nuova chiave ("Invia un'altra segnalazione"). */
+/** The form is reset by remounting it with a new key ("Invia un'altra segnalazione"). */
 export function ReportFormContainer({
   initialSite,
   postback = null,
 }: {
   initialSite: string;
-  /** Esito di un invio fatto senza JavaScript (vedi lib/report-postback). */
+  /** Outcome of a submission made without JavaScript (see lib/report-postback). */
   postback?: ReportFormState | null;
 }) {
   const [round, setRound] = useState(0);
@@ -52,15 +52,15 @@ function ReportForm({
 }) {
   const initialState: ReportFormState = postback ?? {
     status: "idle",
-    values: { kind: "WEBSITE", site: initialSite, desc: "", email: "" },
+    values: { type: "WEBSITE", site: initialSite, desc: "", email: "" },
   };
   const [state, formAction, pending] = useActionState(
     submitReport,
     initialState,
   );
 
-  // Campi controllati: React azzera i campi non controllati dopo l'azione.
-  const [kind, setKind] = useState(state.values.kind);
+  // Controlled fields: React resets uncontrolled fields after the action.
+  const [type, setType] = useState(state.values.type);
   const [site, setSite] = useState(state.values.site);
   const [desc, setDesc] = useState(state.values.desc);
   const [email, setEmail] = useState(state.values.email);
@@ -89,7 +89,7 @@ function ReportForm({
   }
 
   const hint =
-    KIND_OPTIONS.find((o) => o.value === kind)?.hint ?? KIND_OPTIONS[0].hint;
+    TYPE_OPTIONS.find((o) => o.value === type)?.hint ?? TYPE_OPTIONS[0].hint;
 
   return (
     <section className="page" aria-labelledby="titolo">
@@ -111,8 +111,8 @@ function ReportForm({
         action={formAction}
         noValidate
         onSubmit={(event) => {
-          // Con JavaScript invochiamo l'azione a mano: così React non azzera il
-          // modulo dopo l'invio e i valori restano dove la persona li ha lasciati.
+          // With JavaScript we invoke the action manually: this way React does not reset
+          // the form after submission and the values stay where the user left them.
           event.preventDefault();
           if (pending) return;
           const data = new FormData(event.currentTarget);
@@ -125,17 +125,17 @@ function ReportForm({
             <span className="font-normal text-muted">(obbligatorio)</span>
           </legend>
           <div className="flex flex-wrap gap-2">
-            {KIND_OPTIONS.map((option) => (
+            {TYPE_OPTIONS.map((option) => (
               <label
                 key={option.value}
                 className="relative inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-control py-1.5 pr-3.5 pl-2.5 text-[0.9375rem] hover:border-ink has-checked:border-2 has-checked:border-ink has-checked:pl-[calc(0.625rem-1px)] has-checked:font-semibold has-focus-visible:outline-3 has-focus-visible:outline-offset-3 has-focus-visible:outline-ink"
               >
                 <input
                   type="radio"
-                  name="kind"
+                  name="type"
                   value={option.value}
-                  checked={kind === option.value}
-                  onChange={() => setKind(option.value)}
+                  checked={type === option.value}
+                  onChange={() => setType(option.value)}
                   className="m-0 size-5 accent-ink focus-visible:shadow-none focus-visible:outline-none"
                 />
                 {option.label}
@@ -214,7 +214,7 @@ function ReportForm({
           )}
         </Field>
 
-        {/* Campo trappola per i bot: nascosto a tutti, anche ai lettori di schermo. */}
+        {/* Honeypot field for bots: hidden from everyone, screen readers included. */}
         <div
           aria-hidden="true"
           className="absolute -left-[9999px] size-px overflow-hidden"

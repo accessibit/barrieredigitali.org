@@ -9,14 +9,14 @@ export const WCAG_TAGS = [
   "wcag22aa",
 ];
 
-/** Fallisce il test se axe trova violazioni WCAG 2.2 A/AA nel nodo indicato. */
+/** Fails the test if axe finds WCAG 2.2 A/AA violations in the given node. */
 export async function expectNoAxeViolations(
   container: Element,
   options?: RunOptions,
 ) {
   const result = await run(container, {
     runOnly: { type: "tag", values: WCAG_TAGS },
-    // jsdom non calcola il layout: il contrasto si verifica nei test Playwright.
+    // jsdom does not compute layout: contrast is checked in the Playwright tests.
     rules: { "color-contrast": { enabled: false } },
     ...options,
   });

@@ -1,6 +1,6 @@
 /**
- * Certificati CA di Amazon RDS per eu-central-1, per verificare il TLS verso Aurora.
- * Fonte: https://truststore.pki.rds.amazonaws.com/eu-central-1/eu-central-1-bundle.pem
+ * Amazon RDS CA certificates for eu-central-1, used to verify TLS to the database.
+ * Source: https://truststore.pki.rds.amazonaws.com/eu-central-1/eu-central-1-bundle.pem
  */
 export const RDS_CA = `-----BEGIN CERTIFICATE-----
 MIICtDCCAjmgAwIBAgIQenQbcP/Zbj9JxvZ+jXbRnTAKBggqhkjOPQQDAzCBmTEL

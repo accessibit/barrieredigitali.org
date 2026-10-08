@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Favicon } from "@/components/services/Favicon";
 import { formatDate, receivedLabel, toIsoDate } from "@/lib/format";
-import { KIND_LABEL } from "@/lib/kinds";
+import { TYPE_LABEL } from "@/lib/service-types";
 import type { ServiceSummary } from "@/lib/services";
 
 export function ServiceRow({
@@ -29,7 +29,7 @@ export function ServiceRow({
               {service.name}
             </Link>{" "}
             <span className="ml-2 inline-block rounded border border-control px-1.5 align-[0.125rem] text-xs/normal font-medium text-muted narrow:mt-0.5 narrow:ml-0 narrow:align-baseline">
-              {KIND_LABEL[service.kind]}
+              {TYPE_LABEL[service.type]}
             </span>
           </h2>
           <p className="mt-0.5 text-sm text-muted">

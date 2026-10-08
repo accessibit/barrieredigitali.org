@@ -21,7 +21,7 @@ export async function expectNoViolations(page: Page) {
   expect(summary).toEqual([]);
 }
 
-/** Aspetta che i contenuti in streaming siano arrivati. */
+/** Waits for the streamed content to arrive. */
 export async function settled(page: Page) {
   await page.waitForLoadState("networkidle");
   await expect(page.getByText("Caricamento delle segnalazioni…")).toHaveCount(
@@ -60,7 +60,7 @@ export function footerNav(page: Page) {
   return page.getByRole("navigation", { name: "Informazioni" });
 }
 
-/** Accesso diretto al database locale, per verificare cosa salva il modulo. */
+/** Direct access to the local database, to check what the form saves. */
 let pool: Pool | undefined;
 export function db() {
   pool ??= new Pool({
@@ -73,12 +73,12 @@ export function db() {
 
 export async function findReport(submittedName: string) {
   const { rows } = await db().query(
-    `SELECT submitted_kind, submitted_name, description, email, status, service_id
+    `SELECT submitted_type, submitted_name, description, email, status, service_id
        FROM reports WHERE submitted_name = $1 ORDER BY created_at DESC`,
     [submittedName],
   );
   return rows as Array<{
-    submitted_kind: string;
+    submitted_type: string;
     submitted_name: string;
     description: string;
     email: string | null;

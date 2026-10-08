@@ -5,21 +5,21 @@ import { useEffect } from "react";
 
 import { takeReturnFocus } from "@/lib/list-memory";
 
-// A livello di modulo: il componente può essere rimontato dal suo <Suspense>
-// durante la navigazione, ma l'ultimo percorso visto deve sopravvivere.
+// Module-level: the component may be remounted by its <Suspense>
+// during navigation, but the last seen path must survive.
 let previousPathname: string | null = null;
 
 const WATCH_MS = 3000;
 
 /**
- * Dopo una navigazione lato client sposta il focus sul titolo della pagina
- * (o sul servizio da cui si torna, nell'elenco), così chi usa tastiera o lettore
- * di schermo riparte dal nuovo contenuto. Al primo caricamento non fa nulla.
+ * After a client-side navigation, moves focus to the page heading
+ * (or, in the list, to the service being returned from), so keyboard and screen
+ * reader users start again from the new content. Does nothing on first load.
  *
- * Il nuovo contenuto può arrivare dopo il cambio di URL (streaming, prefetch):
- * per qualche secondo, se il focus si perde (finisce sul <body> perché il
- * vecchio titolo è stato rimosso), viene riportato sull'elemento giusto.
- * Qualsiasi interazione della persona interrompe l'attesa.
+ * The new content may arrive after the URL change (streaming, prefetch):
+ * for a few seconds, if focus is lost (it lands on <body> because the
+ * old heading was removed), it is moved back to the right element.
+ * Any user interaction stops the wait.
  */
 export function RouteFocus() {
   const pathname = usePathname();
@@ -32,7 +32,7 @@ export function RouteFocus() {
     if (previousPathname === pathname) return;
     previousPathname = pathname;
 
-    // Tornando dal dettaglio il focus va sul link del servizio appena visto, non sul titolo.
+    // When returning from the detail page, focus goes to the link of the service just viewed, not to the heading.
     const returnTo = takeReturnFocus();
     const find = () =>
       returnTo

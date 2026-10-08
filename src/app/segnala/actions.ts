@@ -4,12 +4,12 @@ import { headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { kindOptionLabel } from "@/lib/kinds";
+import { typeOptionLabel } from "@/lib/service-types";
 import { rememberErrors, rememberSent } from "@/lib/report-postback";
 import { type ReportField, validateReport } from "@/lib/validation";
 
 export type ReportFormValues = {
-  kind: string;
+  type: string;
   site: string;
   desc: string;
   email: string;
@@ -39,14 +39,14 @@ export async function submitReport(
   formData: FormData,
 ): Promise<ReportFormState> {
   const values: ReportFormValues = {
-    kind: read(formData, "kind") || "WEBSITE",
+    type: read(formData, "type") || "WEBSITE",
     site: read(formData, "site"),
     desc: read(formData, "desc"),
     email: read(formData, "email"),
   };
 
-  // Le chiamate dal browser con JavaScript portano l'intestazione Next-Action;
-  // un normale invio del modulo (JavaScript disattivato) no.
+  // Calls from the browser with JavaScript carry the Next-Action header;
+  // a plain form submission (JavaScript disabled) does not.
   const withoutJs = !(await headers()).has("next-action");
 
   const { data, errors } = validateReport(values);
@@ -61,13 +61,13 @@ export async function submitReport(
   }
 
   const recap = {
-    kindLabel: kindOptionLabel(data.kind),
+    kindLabel: typeOptionLabel(data.type),
     site: data.site,
     desc: data.desc,
     email: data.email,
   };
 
-  // Campo trappola per i bot: se compilato, fingiamo il successo senza salvare.
+  // Honeypot field for bots: if filled in, we fake success without saving.
   if (read(formData, "website_url") !== "") {
     if (withoutJs) redirect("/segnala", RedirectType.replace);
     return { status: "sent", values, recap };
@@ -75,7 +75,7 @@ export async function submitReport(
 
   const report = await db.report.create({
     data: {
-      submittedKind: data.kind,
+      submittedType: data.type,
       submittedName: data.site,
       description: data.desc,
       email: data.email || null,

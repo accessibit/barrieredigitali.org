@@ -5,8 +5,8 @@ import { type ReactNode, Suspense } from "react";
 import { ActiveLink } from "@/components/layout/ActiveLink";
 
 /**
- * Link di navigazione. Nello shell statico è un link semplice; quando l'URL
- * è disponibile riceve aria-current="page" se è la pagina attuale.
+ * Navigation link. In the static shell it is a plain link; once the URL
+ * is available it gets aria-current="page" if it is the current page.
  */
 export function NavLink(props: {
   href: Route;

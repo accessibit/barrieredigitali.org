@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * Pagina "bloccante": il server invia l'HTML completo, senza contenuti in
- * streaming. Così elenco, ricerca e modulo funzionano anche senza JavaScript
- * e non c'è salto di layout durante il caricamento.
+ * "Blocking" page: the server sends the complete HTML, with no streamed
+ * content. This way the list, search and form also work without JavaScript
+ * and there is no layout shift while loading.
  */
 export const instant = false;
 

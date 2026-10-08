@@ -113,7 +113,7 @@ test.describe("Salta al contenuto e storia del browser", () => {
     await expect(skip).toBeInViewport();
     await page.keyboard.press("Enter");
     await expect(page.locator("#contenuto")).toBeFocused();
-    // Il Tab successivo parte dal contenuto, non dall'header.
+    // The next Tab starts from the content, not from the header.
     await page.keyboard.press("Tab");
     await expect(
       page.getByRole("link", { name: "Come funziona" }).last(),

@@ -128,7 +128,7 @@ test.describe("Modulo di segnalazione", () => {
     const saved = await findReport(name);
     expect(saved).toHaveLength(1);
     expect(saved[0]).toMatchObject({
-      submitted_kind: "DOCUMENT",
+      submitted_type: "DOCUMENT",
       description: "Il PDF della bolletta è una scansione e non si legge.",
       email: null,
       status: "PENDING",
@@ -169,7 +169,7 @@ test.describe("Modulo di segnalazione", () => {
     const saved = await findReport(name);
     expect(saved).toHaveLength(1);
     expect(saved[0]).toMatchObject({
-      submitted_kind: "APP",
+      submitted_type: "APP",
       submitted_name: name,
       email: "persona@esempio.it",
       status: "PENDING",
@@ -291,7 +291,7 @@ test.describe("Modulo senza JavaScript", () => {
     const saved = await findReport(name);
     expect(saved).toHaveLength(1);
     expect(saved[0]).toMatchObject({
-      submitted_kind: "APP",
+      submitted_type: "APP",
       status: "PENDING",
     });
   });

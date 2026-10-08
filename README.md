@@ -75,7 +75,10 @@ Counts and dates in the list are computed from published reports, so nothing els
 ## Deploy (Vercel)
 
 - Functions run in `fra1` (Frankfurt), next to the database.
-- **Database:** Amazon Aurora PostgreSQL connected through the Vercel Marketplace (integration `aws/aws-apg`), on the production environment only. There is no password: the app signs a 15-minute IAM token with the project's OIDC credentials (`src/lib/db-connection.ts`), over TLS verified with the RDS CA. The variables (`PGHOST`, `PGUSER`, `AWS_ROLE_ARN`, …) are set by the integration.
-- **Migrations:** `vercel-build` applies them (`scripts/migrate.ts`, which signs a token and runs `prisma migrate deploy`) only on production builds; previews do not touch the database. Never run the seed in production.
+- **Database:** Amazon RDS PostgreSQL 18 `barrieredigitali` (`db.t4g.micro`, `eu-central-1`, AWS account `179743357810`). Storage is encrypted, backups are kept for 7 days and deletion protection is on.
+  - The app connects as `bd_app`, owner of the `barrieredigitali` database only. TLS is required: the app verifies the certificate against the RDS CA (`src/lib/db-connection.ts`); `DATABASE_URL` carries `sslmode=require` for the Prisma migrations.
+  - Credentials for `bd_admin` and `bd_app` are in AWS Secrets Manager (`barrieredigitali/db`).
+  - Port 5432 is open to the internet (security group `barrieredigitali-db`), because Vercel has no fixed IPs.
+- **Environment variables (Production):** `DATABASE_URL` (user `bd_app`) and `SITE_URL` (`https://barrieredigitali.org`).
+- **Migrations:** `vercel-build` runs `prisma migrate deploy` only on production builds; previews do not touch the database. Never run the seed in production.
 - **Locally:** `DATABASE_URL` points to the Postgres in Docker.
-- `SITE_URL`: `https://barrieredigitali.org`.

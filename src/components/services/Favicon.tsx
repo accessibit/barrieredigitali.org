@@ -1,6 +1,6 @@
 import { faviconColor } from "@/lib/site";
 
-/** Iniziale colorata al posto del favicon del servizio (decorativa). */
+/** Coloured initial in place of the service's favicon (decorative). */
 export function Favicon({
   name,
   slug,

@@ -5,16 +5,16 @@ import { cache } from "react";
 
 import type { ReportFormState, ReportFormValues } from "@/app/segnala/actions";
 import { db } from "@/lib/db";
-import { kindOptionLabel } from "@/lib/kinds";
+import { typeOptionLabel } from "@/lib/service-types";
 import type { ReportField } from "@/lib/validation";
 
 /**
- * Invio senza JavaScript (Post/Redirect/Get).
+ * Submission without JavaScript (Post/Redirect/Get).
  *
- * Con Cache Components, Next non passa lo stato di useActionState all'HTML
- * generato dopo un invio senza JavaScript. In quel caso l'azione salva
- * l'esito in un cookie di breve durata e reindirizza a /segnala, che lo
- * rilegge. Con JavaScript attivo questo percorso non viene mai usato.
+ * With Cache Components, Next does not pass the useActionState state to the
+ * HTML generated after a submission without JavaScript. In that case the
+ * action saves the outcome in a short-lived cookie and redirects to
+ * /segnala, which reads it back. With JavaScript enabled this path is never used.
  */
 const ERRORS_COOKIE = "bd_modulo";
 const SENT_COOKIE = "bd_inviata";
@@ -34,7 +34,7 @@ export async function rememberErrors(
   errors: Partial<Record<ReportField, string>>,
 ) {
   let payload = JSON.stringify({ values, errors });
-  // Un cookie non supera ~4 KB: una descrizione molto lunga non viene conservata.
+  // A cookie cannot exceed ~4 KB: a very long description is not kept.
   if (encodeURIComponent(payload).length > MAX_COOKIE_BYTES) {
     payload = JSON.stringify({ values: { ...values, desc: "" }, errors });
   }
@@ -43,7 +43,7 @@ export async function rememberErrors(
   store.set(ERRORS_COOKIE, payload, options);
 }
 
-/** Solo l'id della segnalazione: il riepilogo si rilegge dal database. */
+/** Only the report id: the summary is read back from the database. */
 export async function rememberSent(reportId: string) {
   const store = await cookies();
   store.delete({ name: ERRORS_COOKIE, path: options.path });
@@ -56,7 +56,7 @@ function isStringRecord(value: unknown): value is Record<string, unknown> {
 
 const str = (value: unknown) => (typeof value === "string" ? value : "");
 
-/** Stato iniziale del modulo dopo un invio senza JavaScript, se presente. */
+/** Initial form state after a submission without JavaScript, if any. */
 export const readPostback = cache(
   async function readPostback(): Promise<ReportFormState | null> {
     const store = await cookies();
@@ -70,7 +70,7 @@ export const readPostback = cache(
           createdAt: { gte: new Date(Date.now() - MAX_AGE * 1000) },
         },
         select: {
-          submittedKind: true,
+          submittedType: true,
           submittedName: true,
           description: true,
           email: true,
@@ -78,7 +78,7 @@ export const readPostback = cache(
       });
       if (report) {
         const values = {
-          kind: report.submittedKind,
+          type: report.submittedType,
           site: report.submittedName,
           desc: report.description,
           email: report.email ?? "",
@@ -87,7 +87,7 @@ export const readPostback = cache(
           status: "sent",
           values,
           recap: {
-            kindLabel: kindOptionLabel(report.submittedKind),
+            kindLabel: typeOptionLabel(report.submittedType),
             ...values,
           },
         };
@@ -112,7 +112,7 @@ export const readPostback = cache(
           return {
             status: "error",
             values: {
-              kind: str(v.kind) || "WEBSITE",
+              type: str(v.type) || "WEBSITE",
               site: str(v.site),
               desc: str(v.desc),
               email: str(v.email),
@@ -122,7 +122,7 @@ export const readPostback = cache(
           };
         }
       } catch {
-        // Cookie non valido: si riparte da un modulo vuoto.
+        // Invalid cookie: start again from an empty form.
       }
     }
     return null;

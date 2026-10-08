@@ -3,7 +3,7 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { Prisma } from "@/generated/prisma/client";
-import type { ServiceKind } from "@/generated/prisma/enums";
+import type { ServiceType } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { normalizeName } from "@/lib/normalize";
 import { PER_PAGE, REPORTS_PER_PAGE } from "@/lib/site";
@@ -14,7 +14,7 @@ export type ServiceSummary = {
   id: string;
   slug: string;
   name: string;
-  kind: ServiceKind;
+  type: ServiceType;
   count: number;
   lastReportAt: Date;
 };
@@ -32,8 +32,8 @@ function escapeLike(value: string) {
 }
 
 /**
- * Servizi con almeno una segnalazione pubblicata, con conteggio e data
- * dell'ultima segnalazione calcolati al volo (nessun dato denormalizzato).
+ * Services with at least one published report, with the count and date
+ * of the latest report computed on the fly (no denormalized data).
  */
 export async function listServices({
   query,
@@ -49,7 +49,7 @@ export async function listServices({
   cacheTag("reports");
 
   const q = normalizeName(query);
-  // Ricerca indifferente a spazi, trattini e punti: "comune milano" trova "comune-milano.example".
+  // Search ignores spaces, hyphens and dots: "comune milano" finds "comune-milano.example".
   const compact = q.replace(/[^\p{L}\p{N}]+/gu, "");
   const filter = !q
     ? Prisma.empty
@@ -78,7 +78,7 @@ export async function listServices({
     total === 0
       ? []
       : await db.$queryRaw<ServiceSummary[]>`
-    SELECT s.id, s.slug, s.name, s.kind,
+    SELECT s.id, s.slug, s.name, s.type,
       COUNT(r.id)::int AS count,
       MAX(r.published_at) AS "lastReportAt"
     FROM services s
@@ -92,7 +92,7 @@ export async function listServices({
   return { items, total, page: current, pages, start };
 }
 
-/** Testata del dettaglio: servizio, numero di segnalazioni pubblicate e data dell'ultima. */
+/** Detail page header: service, number of published reports and date of the latest one. */
 export async function getService(slug: string) {
   "use cache";
   cacheLife("minutes");
@@ -100,7 +100,7 @@ export async function getService(slug: string) {
 
   const service = await db.service.findUnique({
     where: { slug },
-    select: { id: true, slug: true, name: true, kind: true },
+    select: { id: true, slug: true, name: true, type: true },
   });
   if (!service) return null;
 
@@ -121,7 +121,7 @@ export async function getService(slug: string) {
   return { ...service, count, lastReportAt: latest.publishedAt };
 }
 
-/** Una pagina delle segnalazioni pubblicate di un servizio, dalla più recente. */
+/** One page of a service's published reports, most recent first. */
 export async function getServiceReports(
   serviceId: string,
   page: number,

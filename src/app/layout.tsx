@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { RouteFocus } from "@/components/layout/RouteFocus";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SITE } from "@/lib/site";
+import { SITE, SITE_URL } from "@/lib/site";
 
 import "./globals.css";
 
@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL ?? "https://barrieredigitali.org"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: `Segnalazioni — ${SITE.name}`,
     template: `%s — ${SITE.name}`,

@@ -55,7 +55,7 @@
     margin: 0;
   }
 
-  /* Il preflight di Tailwind toglie la sottolineatura: i link nel testo devono averla. */
+  /* Tailwind's preflight removes the underline: links in text must have it. */
   a {
     color: var(--color-accent);
     text-decoration-line: underline;

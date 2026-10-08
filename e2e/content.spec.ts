@@ -35,7 +35,7 @@ for (const { path, title, h2 } of PAGES) {
     await expect(page).toHaveTitle(title);
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.getByRole("heading", { level: 2 })).toHaveText(h2);
-    // I dati ancora da definire sono evidenziati, non nascosti.
+    // Data still to be defined is highlighted, not hidden.
     const placeholders = page.locator(".placeholder-mark");
     if (path !== "/chi-siamo" || (await placeholders.count()) > 0) {
       for (const text of await placeholders.allTextContents())

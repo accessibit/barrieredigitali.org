@@ -11,7 +11,7 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`;
  */
 export default defineConfig({
   testDir: "./e2e",
-  // Cancella le segnalazioni create dai test, una volta sola alla fine.
+  // Deletes the reports created by the tests, once at the end.
   globalTeardown: "./e2e/teardown.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

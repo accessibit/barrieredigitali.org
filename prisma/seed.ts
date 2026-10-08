@@ -1,8 +1,8 @@
 /**
- * Dati dimostrativi per lo sviluppo locale (vedi `seed-data.ts`).
+ * Demo data for local development (see `seed-data.ts`).
  *
- * Rifiuta di girare su un database che non sia locale: in produzione si
- * esegue solo `prisma migrate deploy`.
+ * Refuses to run against a non-local database: in production only
+ * `prisma migrate deploy` is run.
  */
 import "dotenv/config";
 
@@ -61,11 +61,11 @@ async function main() {
           slug: slugify(service.name),
           name: service.name,
           nameNormalized: normalizeName(service.name),
-          kind: service.kind,
+          type: service.type,
           reports: {
             createMany: {
               data: reports.map((r) => ({
-                submittedKind: service.kind,
+                submittedType: service.type,
                 submittedName: service.name,
                 description: r.text,
                 status: "PUBLISHED" as const,
@@ -78,18 +78,18 @@ async function main() {
       });
     }
 
-    // Alcune segnalazioni in attesa di verifica, per provare la moderazione in Prisma Studio.
+    // A few reports awaiting review, to try out moderation in Prisma Studio.
     await db.report.createMany({
       data: [
         {
-          submittedKind: "WEBSITE",
+          submittedType: "WEBSITE",
           submittedName: "comune.genova.it",
           description:
             "Il modulo per il cambio di residenza non si compila con la tastiera.",
           status: "PENDING",
         },
         {
-          submittedKind: "APP",
+          submittedType: "APP",
           submittedName: "App Trenord",
           description:
             "Il QR del biglietto non ha un'alternativa testuale per il lettore di schermo.",

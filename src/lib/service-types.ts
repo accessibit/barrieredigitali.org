@@ -1,15 +1,15 @@
-import type { ServiceKind } from "@/generated/prisma/enums";
+import type { ServiceType } from "@/generated/prisma/enums";
 
-/** Etichetta mostrata accanto al nome del servizio. */
-export const KIND_LABEL: Record<ServiceKind, string> = {
+/** Label shown next to the service name. */
+export const TYPE_LABEL: Record<ServiceType, string> = {
   WEBSITE: "Sito web",
   APP: "App",
   DOCUMENT: "Documento PDF",
   OTHER: "Altro servizio digitale",
 };
 
-/** Opzioni del modulo di segnalazione, nell'ordine del design. */
-export const KIND_OPTIONS = [
+/** Options of the report form, in the design's order. */
+export const TYPE_OPTIONS = [
   {
     value: "WEBSITE",
     label: "Sito web",
@@ -31,11 +31,11 @@ export const KIND_OPTIONS = [
     hint: "Il nome del servizio, ad esempio un totem o uno sportello digitale.",
   },
 ] as const satisfies ReadonlyArray<{
-  value: ServiceKind;
+  value: ServiceType;
   label: string;
   hint: string;
 }>;
 
-export function kindOptionLabel(kind: ServiceKind): string {
-  return KIND_OPTIONS.find((o) => o.value === kind)?.label ?? KIND_LABEL[kind];
+export function typeOptionLabel(type: ServiceType): string {
+  return TYPE_OPTIONS.find((o) => o.value === type)?.label ?? TYPE_LABEL[type];
 }

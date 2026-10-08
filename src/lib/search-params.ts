@@ -2,7 +2,7 @@ import type { SortOrder } from "@/lib/services";
 
 type Raw = Record<string, string | string[] | undefined>;
 
-/** Ultimo valore di un parametro: con i form GET il pulsante premuto arriva per ultimo. */
+/** Last value of a parameter: with GET forms the pressed button comes last. */
 export function last(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value.at(-1) ?? "";
   return value ?? "";
@@ -22,7 +22,7 @@ export function parseListParams(raw: Raw) {
   return { query, sort, page, from };
 }
 
-/** Costruisce l'URL dell'elenco mantenendo solo i parametri non predefiniti. */
+/** Builds the list URL keeping only non-default parameters. */
 export function listHref({
   query = "",
   sort = "count",
@@ -40,7 +40,7 @@ export function listHref({
   return qs ? `/?${qs}` : "/";
 }
 
-/** Numeri di pagina da mostrare: prima, precedente, attuale, successiva, ultima. */
+/** Page numbers to show: first, previous, current, next, last. */
 export function pageWindow(page: number, pages: number): Array<number | "gap"> {
   const nums = [...new Set([1, page - 1, page, page + 1, pages])]
     .filter((n) => n >= 1 && n <= pages)

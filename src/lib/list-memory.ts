@@ -1,8 +1,8 @@
 /**
- * Memoria di navigazione tra elenco e dettaglio, in sessionStorage:
- * l'ultimo URL dell'elenco (ricerca, ordinamento, pagina) e il servizio
- * su cui riportare il focus al ritorno. Ogni accesso è protetto: in
- * navigazione privata o con lo storage bloccato si ripiega su "/".
+ * Navigation memory between list and detail, in sessionStorage:
+ * the last list URL (search, sort order, page) and the service
+ * to move focus back to on return. Every access is guarded: in
+ * private browsing or with storage blocked it falls back to "/".
  */
 const LIST_KEY = "bd:elenco";
 const FOCUS_KEY = "bd:ritorno";
@@ -36,7 +36,7 @@ export function setReturnFocus(slug: string) {
   } catch {}
 }
 
-/** Legge e cancella lo slug su cui riportare il focus. */
+/** Reads and clears the slug to move focus back to. */
 export function takeReturnFocus(): string | null {
   try {
     const slug = storage()?.getItem(FOCUS_KEY) ?? null;

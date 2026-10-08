@@ -6,7 +6,7 @@ import { pageWindow } from "@/lib/search-params";
 const box =
   "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-control px-3 font-medium text-ink no-underline tabular-nums hover:border-ink hover:bg-paper hover:text-ink";
 
-/** Paginazione con link reali: funziona anche senza JavaScript. */
+/** Pagination with real links: also works without JavaScript. */
 export function Pager({
   label,
   summary,

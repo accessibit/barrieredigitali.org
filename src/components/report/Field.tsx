@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-/** Etichetta, suggerimento ed eventuale errore di un campo del modulo. */
+/** Label, hint and optional error of a form field. */
 export function Field({
   id,
   label,
