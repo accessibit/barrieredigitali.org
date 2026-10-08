@@ -76,13 +76,11 @@ test.describe("Metadati, icone e header", () => {
   });
 
   test("www reindirizza al dominio principale", async ({ request }) => {
-    const res = await request.get("/chi-siamo", {
+    const res = await request.get("/stampa", {
       headers: { host: "www.barrieredigitali.org" },
       maxRedirects: 0,
     });
     expect(res.status()).toBe(308);
-    expect(res.headers().location).toBe(
-      "https://barrieredigitali.org/chi-siamo",
-    );
+    expect(res.headers().location).toBe("https://barrieredigitali.org/stampa");
   });
 });

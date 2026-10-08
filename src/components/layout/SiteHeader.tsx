@@ -31,11 +31,6 @@ export function SiteHeader() {
                 Come funziona
               </NavLink>
             </li>
-            <li>
-              <NavLink href="/chi-siamo" className={navLink}>
-                Chi siamo
-              </NavLink>
-            </li>
           </ul>
         </nav>
         <NavLink

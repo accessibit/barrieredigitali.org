@@ -13,7 +13,6 @@ const PAGES = [
   ["modulo", "/segnala"],
   ["modulo precompilato", "/segnala?servizio=inps.it"],
   ["come funziona", "/come-funziona"],
-  ["chi siamo", "/chi-siamo"],
   ["stampa", "/stampa"],
   ["privacy", "/privacy"],
   ["pagina non trovata", "/pagina-che-non-esiste"],

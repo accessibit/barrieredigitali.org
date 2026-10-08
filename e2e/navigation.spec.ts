@@ -4,7 +4,7 @@ import { footerNav, header, mainNav, settled } from "./helpers";
 
 test.describe("Header", () => {
   test("il logo riporta all'elenco", async ({ page }) => {
-    await page.goto("/chi-siamo");
+    await page.goto("/stampa");
     await header(page).getByRole("link", { name: "Barriere Digitali" }).click();
     await expect(page).toHaveURL("/");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
@@ -15,7 +15,6 @@ test.describe("Header", () => {
   const NAV = [
     ["Segnalazioni", "/", "Le barriere del web, segnalate da chi le incontra."],
     ["Come funziona", "/come-funziona", "Come trattiamo le segnalazioni"],
-    ["Chi siamo", "/chi-siamo", "Chi siamo"],
   ] as const;
 
   for (const [label, path, heading] of NAV) {
@@ -54,6 +53,13 @@ test.describe("Header", () => {
     ).toHaveAttribute("aria-current", "page");
   });
 
+  test("la pagina 'Chi siamo' non esiste più", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("link", { name: "Chi siamo" })).toHaveCount(0);
+    const response = await page.goto("/chi-siamo");
+    expect(response?.status()).toBe(404);
+  });
+
   test("nel dettaglio di un servizio il menu indica 'Segnalazioni'", async ({
     page,
   }) => {
@@ -67,7 +73,6 @@ test.describe("Header", () => {
 
 test.describe("Footer", () => {
   const LINKS = [
-    ["Chi siamo", "/chi-siamo", "Chi siamo"],
     [
       "Come trattiamo le segnalazioni",
       "/come-funziona",
@@ -123,20 +128,20 @@ test.describe("Salta al contenuto e storia del browser", () => {
   test("indietro e avanti del browser funzionano", async ({ page }) => {
     await page.goto("/");
     await settled(page);
-    await mainNav(page).getByRole("link", { name: "Chi siamo" }).click();
-    await expect(page).toHaveURL("/chi-siamo");
+    await mainNav(page).getByRole("link", { name: "Come funziona" }).click();
+    await expect(page).toHaveURL("/come-funziona");
     await footerNav(page).getByRole("link", { name: "Privacy" }).click();
     await expect(page).toHaveURL("/privacy");
     await page.goBack();
-    await expect(page).toHaveURL("/chi-siamo");
+    await expect(page).toHaveURL("/come-funziona");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Chi siamo",
+      "Come trattiamo le segnalazioni",
     );
     await page.goBack();
     await expect(page).toHaveURL("/");
     await page.goForward();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Chi siamo",
+      "Come trattiamo le segnalazioni",
     );
   });
 });

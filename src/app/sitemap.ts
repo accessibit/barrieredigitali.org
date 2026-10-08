@@ -3,14 +3,7 @@ import { cacheLife } from "next/cache";
 
 import { SITE_URL } from "@/lib/site";
 
-const PATHS = [
-  "/",
-  "/segnala",
-  "/come-funziona",
-  "/chi-siamo",
-  "/stampa",
-  "/privacy",
-];
+const PATHS = ["/", "/segnala", "/come-funziona", "/stampa", "/privacy"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   "use cache";

@@ -10,11 +10,6 @@ export function SiteFooter() {
         <nav aria-label="Informazioni">
           <ul className="m-0 flex list-none flex-wrap gap-x-6 p-0 narrow:flex-col narrow:gap-0">
             <li>
-              <NavLink href="/chi-siamo" className={link}>
-                Chi siamo
-              </NavLink>
-            </li>
-            <li>
               <NavLink href="/come-funziona" className={link}>
                 Come trattiamo le segnalazioni
               </NavLink>

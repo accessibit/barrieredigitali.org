@@ -1,5 +1,5 @@
 /**
- * Contacts and organization details. Until they are defined they remain
+ * Contacts and data-controller details. Until they are defined they remain
  * placeholders, highlighted on the pages as in the design.
  */
 /** Public URL of the site (sitemap, robots.txt, canonical and Open Graph URLs). */
@@ -11,7 +11,6 @@ export const SITE = {
   pressEmail: null as string | null, // [EMAIL STAMPA]
   pressPhone: null as string | null, // [TELEFONO]
   privacyEmail: null as string | null, // [EMAIL PRIVACY]
-  organization: null as string | null, // [NOME DELL'ORGANIZZAZIONE E BREVE DESCRIZIONE]
   dataController: null as string | null, // [TITOLARE]
   emailRetention: null as string | null, // [PERIODO]
 };

@@ -11,11 +11,6 @@ const PAGES = [
     ],
   },
   {
-    path: "/chi-siamo",
-    title: "Chi siamo — Barriere Digitali",
-    h2: ["Chi promuove il progetto", "Cosa non facciamo"],
-  },
-  {
     path: "/stampa",
     title: "Contatto stampa — Barriere Digitali",
     h2: ["Contatti", "Prima di citare una segnalazione"],
@@ -37,10 +32,8 @@ for (const { path, title, h2 } of PAGES) {
     await expect(page.getByRole("heading", { level: 2 })).toHaveText(h2);
     // Data still to be defined is highlighted, not hidden.
     const placeholders = page.locator(".placeholder-mark");
-    if (path !== "/chi-siamo" || (await placeholders.count()) > 0) {
-      for (const text of await placeholders.allTextContents())
-        expect(text).toMatch(/^\[.+\]$/);
-    }
+    for (const text of await placeholders.allTextContents())
+      expect(text).toMatch(/^\[.+\]$/);
   });
 }
 
